@@ -51,6 +51,7 @@ uploads/
 
 # Environment and configuration files
 .env
+.env.example
 .env.local
 .env.*.local
 
