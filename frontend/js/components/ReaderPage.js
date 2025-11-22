@@ -1,5 +1,6 @@
 import { booksAPI } from '/frontend-api/books.js';
 import { chatAPI } from '/frontend-api/chat.js';
+import { configAPI } from '/frontend-api/config.js';
 
 export function ReaderPage() {
   return {
@@ -25,6 +26,17 @@ export function ReaderPage() {
     loadingDots: 0,
     loadingInterval: null,
 
+    // Settings state
+    settingsOpen: false,
+    activeSettingsTab: 'model',
+    settings: {
+      apiKey: '',
+      baseUrl: 'https://api.openai.com/v1',
+      modelName: 'gpt-4o-mini',
+      temperature: 0.7,
+      maxTokens: 32000
+    },
+
     async init() {
       // Get bookId and chapterIndex from the current page URL
       const pathParts = window.location.pathname.split('/');
@@ -48,6 +60,9 @@ export function ReaderPage() {
         this.error = 'Invalid URL format';
         this.loading = false;
       }
+
+      // Load settings configuration
+      await this.loadSettings();
     },
 
     async loadBook() {
@@ -673,6 +688,98 @@ export function ReaderPage() {
         this.loadingInterval = null;
       }
       this.loadingDots = 0;
+    },
+
+    // Settings methods
+    async loadSettings() {
+      try {
+        const config = await configAPI.getConfig();
+        if (config) {
+          // Update settings state (API key will be masked for security)
+          this.settings = {
+            apiKey: config.api_key?.startsWith('******') ? '' : config.api_key || '',
+            baseUrl: config.base_url || 'https://api.openai.com/v1',
+            modelName: config.model_name || 'gpt-4o-mini',
+            temperature: config.temperature || 0.7,
+            maxTokens: config.max_tokens || 32000
+          };
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+        if (window.app && window.app.showToast) {
+          window.app.showToast('Failed to load configuration', 'error');
+        }
+      }
+    },
+
+    toggleSettings() {
+      this.settingsOpen = !this.settingsOpen;
+    },
+
+    async saveSettings() {
+      try {
+        // Validate required fields
+        if (!this.settings.apiKey.trim()) {
+          throw new Error('API Key is required');
+        }
+        if (!this.settings.baseUrl.trim()) {
+          throw new Error('Base URL is required');
+        }
+        if (!this.settings.modelName.trim()) {
+          throw new Error('Model Name is required');
+        }
+
+        // Prepare updates
+        const updates = {
+          api_key: this.settings.apiKey.trim(),
+          base_url: this.settings.baseUrl.trim(),
+          model_name: this.settings.modelName.trim()
+        };
+
+        // Only include optional fields if they're not empty
+        if (this.settings.temperature !== null && this.settings.temperature !== '') {
+          updates.temperature = parseFloat(this.settings.temperature);
+        }
+        if (this.settings.maxTokens !== null && this.settings.maxTokens !== '') {
+          updates.max_tokens = parseInt(this.settings.maxTokens);
+        }
+
+        await configAPI.updateConfig(updates);
+
+        this.settingsOpen = false;
+        if (window.app && window.app.showToast) {
+          window.app.showToast('Settings saved successfully', 'success');
+        }
+      } catch (error) {
+        console.error('Failed to save settings:', error);
+        if (window.app && window.app.showToast) {
+          window.app.showToast(error.message || 'Failed to save settings', 'error');
+        }
+      }
+    },
+
+    async resetSettings() {
+      try {
+        await configAPI.resetConfig();
+
+        // Reset local settings state
+        this.settings = {
+          apiKey: '',
+          baseUrl: 'https://api.openai.com/v1',
+          modelName: 'gpt-4o-mini',
+          temperature: 0.7,
+          maxTokens: 32000
+        };
+
+        if (window.app && window.app.showToast) {
+          window.app.showToast('Settings reset to defaults', 'success');
+        }
+      } catch (error) {
+        console.error('Failed to reset settings:', error);
+        if (window.app && window.app.showToast) {
+          window.app.showToast('Failed to reset settings', 'error');
+        }
+      }
     },
 
     // Update reading progress based on scroll position

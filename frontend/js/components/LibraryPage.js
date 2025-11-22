@@ -1,4 +1,5 @@
 import { booksAPI } from '/frontend-api/books.js';
+import { configAPI } from '/frontend-api/config.js';
 
 export function LibraryPage() {
   return {
@@ -11,10 +12,29 @@ export function LibraryPage() {
     uploadStatus: null,
     isDarkMode: false,
 
+    // Settings related properties
+    showSettingsModal: false,
+    activeTab: 'model',
+    settingsForm: {
+      api_key: '',
+      base_url: 'https://api.openai.com/v1',
+      model_name: 'gpt-4o-mini',
+      temperature: 0.7,
+      max_tokens: 32000
+    },
+    savingSettings: false,
+
     async init() {
+      // Debug: Log that init is being called
+      console.log('LibraryPage init() called');
+
       // Load dark mode preference
       this.isDarkMode = localStorage.getItem('darkMode') === 'true';
       this.applyDarkMode();
+
+      // Load configuration and check if model is configured
+      await this.loadSettings();
+      await this.checkConfigStatus();
 
       await this.loadBooks();
     },
@@ -171,6 +191,76 @@ export function LibraryPage() {
           case 'processing': return 'bg-gray-100 text-gray-800 border-gray-300';
           default: return 'bg-gray-100 text-gray-800 border-gray-200';
         }
+      }
+    },
+
+    // Settings related methods
+    async loadSettings() {
+      try {
+        const config = await configAPI.getConfig();
+        // Load settings into form, but keep masked API key if present
+        this.settingsForm = {
+          api_key: config.api_key && !config.api_key.startsWith('******') ? config.api_key : '',
+          base_url: config.base_url || 'https://api.openai.com/v1',
+          model_name: config.model_name || 'gpt-4o-mini',
+          temperature: config.temperature || 0.7,
+          max_tokens: config.max_tokens || 32000
+        };
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      }
+    },
+
+    async checkConfigStatus() {
+      try {
+        const config = await configAPI.getConfig();
+        // Check if API key is properly configured (not masked)
+        if (!config.api_key || config.api_key.startsWith('******')) {
+          // API key is not configured, show settings modal
+          this.showSettingsModal = true;
+          window.app.showToast('请先配置AI模型设置', 'error');
+        }
+      } catch (error) {
+        console.error('Failed to check config status:', error);
+        // If we can't get config, show settings modal
+        this.showSettingsModal = true;
+        window.app.showToast('请先配置AI模型设置', 'error');
+      }
+    },
+
+    toggleSettings() {
+      // Debug: Log that toggleSettings is being called
+      console.log('toggleSettings() called');
+      this.showSettingsModal = !this.showSettingsModal;
+      if (this.showSettingsModal) {
+        this.loadSettings();
+      }
+    },
+
+    closeSettingsModal() {
+      this.showSettingsModal = false;
+    },
+
+    async saveSettings() {
+      this.savingSettings = true;
+      try {
+        await configAPI.updateConfig(this.settingsForm);
+        window.app.showToast('设置保存成功', 'success');
+        this.closeSettingsModal();
+      } catch (error) {
+        window.app.showToast(error.message || '保存设置失败', 'error');
+      } finally {
+        this.savingSettings = false;
+      }
+    },
+
+    async resetSettings() {
+      try {
+        await configAPI.resetConfig();
+        await this.loadSettings();
+        window.app.showToast('设置已重置为默认值', 'success');
+      } catch (error) {
+        window.app.showToast(error.message || '重置设置失败', 'error');
       }
     }
   };

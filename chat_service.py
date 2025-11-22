@@ -9,7 +9,7 @@ import json
 import asyncio
 from typing import Dict, Optional, List
 from dataclasses import dataclass
-from dotenv import load_dotenv
+from config_manager import get_model_config
 
 try:
     from openai import OpenAI, AsyncOpenAI
@@ -53,27 +53,32 @@ class ChatService:
     """Service for handling chat interactions with OpenAI."""
 
     def __init__(self):
-        """Initialize the chat service with OpenAI configuration."""
-        # Load environment variables
-        load_dotenv()
-
+        """Initialize the chat service with OpenAI configuration from TinyDB."""
         if not OPENAI_AVAILABLE:
             logger.error("OpenAI library not installed. Install with: pip install openai")
             self.client = None
             return
 
-        # Get configuration from environment
-        self.base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
-        self.api_key = os.getenv("OPENAI_API_KEY")
-        self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-        self.temperature = float(os.getenv("OPENAI_TEMPERATURE", "0.7"))
-        self.max_tokens = int(os.getenv("OPENAI_MAX_TOKENS", "2000"))
+        # Get configuration from TinyDB
+        config = get_model_config()
 
-        # Validate configuration
-        if not self.api_key:
-            logger.error("OPENAI_API_KEY not found in environment variables")
+        if not config:
+            logger.error("No configuration found. Please configure the AI model settings.")
             self.client = None
             return
+
+        # Validate configuration
+        if not config.api_key:
+            logger.error("API key not configured. Please configure the AI model settings.")
+            self.client = None
+            return
+
+        # Store configuration
+        self.base_url = config.base_url
+        self.api_key = config.api_key
+        self.model = config.model_name
+        self.temperature = config.temperature or 0.7
+        self.max_tokens = config.max_tokens or 2000
 
         # Initialize OpenAI clients
         try:

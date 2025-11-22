@@ -5,9 +5,17 @@ import { ReaderPage } from './components/ReaderPage.js';
 // API
 import { booksAPI } from '/frontend-api/books.js';
 import { chatAPI } from '/frontend-api/chat.js';
+import { configAPI } from '/frontend-api/config.js';
 
 // Application utilities
 window.app = {
+  // API configuration
+  api: {
+    books: booksAPI,
+    chat: chatAPI,
+    config: configAPI
+  },
+
   // Initialize application
   async init() {
     console.log('Initializing Reader3 Application...');
@@ -54,13 +62,22 @@ window.app = {
 
 // Register Alpine components
 document.addEventListener('alpine:init', () => {
+  console.log('Alpine.js initializing...');
+
   // Register global data and methods
   Alpine.data('app', () => window.app);
+  console.log('App component registered');
 
   // Register page components
   Alpine.data('LibraryPage', LibraryPage);
+  console.log('LibraryPage component registered');
+
   Alpine.data('ReaderPage', ReaderPage);
+  console.log('ReaderPage component registered');
 });
+
+// Debug: Log when modules are loaded
+console.log('App.js loaded, Alpine.js available:', typeof Alpine !== 'undefined');
 
 // Add custom styles for animations
 const style = document.createElement('style');

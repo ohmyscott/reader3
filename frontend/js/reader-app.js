@@ -4,9 +4,17 @@ import { ReaderPage } from './components/ReaderPage.js';
 // API - use absolute imports for MPA
 import { booksAPI } from '/frontend-api/books.js';
 import { chatAPI } from '/frontend-api/chat.js';
+import { configAPI } from '/frontend-api/config.js';
 
 // Application utilities (re-exported for reader page)
 window.app = {
+  // API utilities
+  api: {
+    books: booksAPI,
+    chat: chatAPI,
+    config: configAPI,
+  },
+
   // Initialize application
   async init() {
     console.log('Initializing Reader3 Reader Application...');

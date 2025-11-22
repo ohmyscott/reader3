@@ -37,6 +37,14 @@
                 <div class="flex justify-between items-center">
                     <h1 class="text-3xl font-bold text-white">📚 My Library</h1>
                     <div class="flex items-center gap-3">
+                        <!-- Settings Button -->
+                        <button
+                            @click="toggleSettings()"
+                            class="p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-all duration-200"
+                            title="设置"
+                        >
+                            ⚙️
+                        </button>
                         <!-- Dark Mode Toggle -->
                         <button
                             @click="toggleDarkMode()"
@@ -202,6 +210,151 @@
                         <span x-show="!uploading">📤 Upload Book</span>
                         <span x-show="uploading">⏳ Processing...</span>
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div
+            x-show="showSettingsModal"
+            class="modal-overlay"
+            @click="closeSettingsModal()"
+        >
+            <div
+                class="modal-content max-w-4xl max-h-[90vh] overflow-y-auto"
+                @click.stop
+            >
+                <!-- Modal Header -->
+                <div class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-600">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">⚙️ 系统设置</h2>
+                    <button
+                        @click="closeSettingsModal()"
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 text-lg leading-none"
+                        title="关闭设置"
+                    >
+                        ×
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6">
+                    <!-- Tabs -->
+                    <div class="flex border-b border-gray-200 dark:border-gray-600 mb-6">
+                        <button
+                            @click="activeTab = 'model'"
+                            class="px-4 py-2 font-medium text-sm rounded-t-lg transition-colors duration-200"
+                            :class="activeTab === 'model' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'"
+                        >
+                            模型设置
+                        </button>
+                    </div>
+
+                    <!-- Model Settings Tab -->
+                    <div x-show="activeTab === 'model'" x-transition>
+                        <form @submit.prevent="saveSettings()">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- API Key -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        API Key <span class="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="password"
+                                        x-model="settingsForm.api_key"
+                                        class="form-input"
+                                        placeholder="请输入API密钥"
+                                        required
+                                    />
+                                </div>
+
+                                <!-- Base URL -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Base URL <span class="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="url"
+                                        x-model="settingsForm.base_url"
+                                        class="form-input"
+                                        placeholder="https://api.openai.com/v1"
+                                        required
+                                    />
+                                </div>
+
+                                <!-- Model Name -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Model Name <span class="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        x-model="settingsForm.model_name"
+                                        class="form-input"
+                                        placeholder="gpt-4o-mini"
+                                        required
+                                    />
+                                </div>
+
+                                <!-- Temperature -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Temperature (可选)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        x-model="settingsForm.temperature"
+                                        class="form-input"
+                                        placeholder="0.7"
+                                        min="0"
+                                        max="2"
+                                        step="0.1"
+                                    />
+                                </div>
+
+                                <!-- Max Tokens -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Max Tokens (可选)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        x-model="settingsForm.max_tokens"
+                                        class="form-input"
+                                        placeholder="32000"
+                                        min="1"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="flex justify-between items-center mt-8">
+                                <button
+                                    type="button"
+                                    @click="resetSettings()"
+                                    class="btn bg-gray-500 hover:bg-gray-600 text-white"
+                                >
+                                    重置为默认值
+                                </button>
+                                <div class="flex gap-3">
+                                    <button
+                                        type="button"
+                                        @click="closeSettingsModal()"
+                                        class="btn bg-gray-300 hover:bg-gray-400 text-gray-700"
+                                    >
+                                        取消
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        :disabled="savingSettings"
+                                        class="btn bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                                    >
+                                        <span x-show="!savingSettings">保存设置</span>
+                                        <span x-show="savingSettings">保存中...</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

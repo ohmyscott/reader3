@@ -128,6 +128,20 @@ wheels = [
 ]
 
 [[package]]
+name = "flake8"
+version = "7.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "mccabe" },
+    { name = "pycodestyle" },
+    { name = "pyflakes" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9b/af/fbfe3c4b5a657d79e5c47a2827a362f9e1b763336a52f926126aa6dc7123/flake8-7.3.0.tar.gz", hash = "sha256:fe044858146b9fc69b551a4b490d69cf960fcb78ad1edcb84e7fbb1b4a8e3872", size = 48326, upload-time = "2025-06-20T19:31:35.838Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9f/56/13ab06b4f93ca7cac71078fbe37fcea175d3216f31f85c3168a6bbd0bb9a/flake8-7.3.0-py2.py3-none-any.whl", hash = "sha256:b9696257b9ce8beb888cdbe31cf885c90d31928fe202be0889a7cdafad32f01e", size = 57922, upload-time = "2025-06-20T19:31:34.425Z" },
+]
+
+[[package]]
 name = "h11"
 version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -548,6 +562,15 @@ wheels = [
 ]
 
 [[package]]
+name = "mccabe"
+version = "0.7.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e7/ff/0ffefdcac38932a54d2b5eed4e0ba8a408f215002cd178ad1df0f2806ff8/mccabe-0.7.0.tar.gz", hash = "sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325", size = 9658, upload-time = "2022-01-24T01:14:51.113Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/27/1a/1f68f9ba0c207934b35b86a8ca3aad8395a3d6dd7921c0686e23853ff5a9/mccabe-0.7.0-py2.py3-none-any.whl", hash = "sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e", size = 7350, upload-time = "2022-01-24T01:14:49.62Z" },
+]
+
+[[package]]
 name = "openai"
 version = "2.8.1"
 source = { registry = "https://pypi.org/simple" }
@@ -564,6 +587,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/d5/e4/42591e356f1d53c568418dc7e30dcda7be31dd5a4d570bca22acb0525862/openai-2.8.1.tar.gz", hash = "sha256:cb1b79eef6e809f6da326a7ef6038719e35aa944c42d081807bfa1be8060f15f", size = 602490, upload-time = "2025-11-17T22:39:59.549Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/55/4f/dbc0c124c40cb390508a82770fb9f6e3ed162560181a85089191a851c59a/openai-2.8.1-py3-none-any.whl", hash = "sha256:c6c3b5a04994734386e8dad3c00a393f56d3b68a27cd2e8acae91a59e4122463", size = 1022688, upload-time = "2025-11-17T22:39:57.675Z" },
+]
+
+[[package]]
+name = "pycodestyle"
+version = "2.14.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/11/e0/abfd2a0d2efe47670df87f3e3a0e2edda42f055053c85361f19c0e2c1ca8/pycodestyle-2.14.0.tar.gz", hash = "sha256:c4b5b517d278089ff9d0abdec919cd97262a3367449ea1c8b49b91529167b783", size = 39472, upload-time = "2025-06-20T18:49:48.75Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d7/27/a58ddaf8c588a3ef080db9d0b7e0b97215cee3a45df74f3a94dbbf5c893a/pycodestyle-2.14.0-py2.py3-none-any.whl", hash = "sha256:dd6bf7cb4ee77f8e016f9c8e74a35ddd9f67e1d5fd4184d86c3b98e07099f42d", size = 31594, upload-time = "2025-06-20T18:49:47.491Z" },
 ]
 
 [[package]]
@@ -700,6 +732,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pyflakes"
+version = "3.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/45/dc/fd034dc20b4b264b3d015808458391acbf9df40b1e54750ef175d39180b1/pyflakes-3.4.0.tar.gz", hash = "sha256:b24f96fafb7d2ab0ec5075b7350b3d2d2218eab42003821c06344973d3ea2f58", size = 64669, upload-time = "2025-06-20T18:45:27.834Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c2/2f/81d580a0fb83baeb066698975cb14a618bdbed7720678566f1b046a95fe8/pyflakes-3.4.0-py2.py3-none-any.whl", hash = "sha256:f742a7dbd0d9cb9ea41e9a24a918996e8170c799fa528688d40dd582c8265f4f", size = 63551, upload-time = "2025-06-20T18:45:26.937Z" },
+]
+
+[[package]]
 name = "python-dotenv"
 version = "1.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -796,7 +837,13 @@ dependencies = [
     { name = "python-dotenv" },
     { name = "python-multipart" },
     { name = "sse-starlette" },
+    { name = "tinydb" },
     { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "flake8" },
 ]
 
 [package.metadata]
@@ -804,6 +851,7 @@ requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.14.2" },
     { name = "ebooklib", specifier = ">=0.20" },
     { name = "fastapi", specifier = ">=0.121.2" },
+    { name = "flake8", marker = "extra == 'dev'", specifier = ">=6.0.0" },
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "loguru", specifier = ">=0.7.0" },
     { name = "openai", specifier = ">=1.0.0" },
@@ -811,8 +859,10 @@ requires-dist = [
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "python-multipart", specifier = ">=0.0.20" },
     { name = "sse-starlette", specifier = ">=1.6.2" },
+    { name = "tinydb", specifier = ">=4.8.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.38.0" },
 ]
+provides-extras = ["dev"]
 
 [[package]]
 name = "six"
@@ -864,6 +914,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/de/1a/608df0b10b53b0beb96a37854ee05864d182ddd4b1156a22f1ad3860425a/starlette-0.49.3.tar.gz", hash = "sha256:1c14546f299b5901a1ea0e34410575bc33bbd741377a10484a54445588d00284", size = 2655031, upload-time = "2025-11-01T15:12:26.13Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a3/e0/021c772d6a662f43b63044ab481dc6ac7592447605b5b35a957785363122/starlette-0.49.3-py3-none-any.whl", hash = "sha256:b579b99715fdc2980cf88c8ec96d3bf1ce16f5a8051a7c2b84ef9b1cdecaea2f", size = 74340, upload-time = "2025-11-01T15:12:24.387Z" },
+]
+
+[[package]]
+name = "tinydb"
+version = "4.8.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a0/79/4af51e2bb214b6ea58f857c51183d92beba85b23f7ba61c983ab3de56c33/tinydb-4.8.2.tar.gz", hash = "sha256:f7dfc39b8d7fda7a1ca62a8dbb449ffd340a117c1206b68c50b1a481fb95181d", size = 32566, upload-time = "2024-10-12T15:24:01.13Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/78/17/853354204e1ca022d6b7d011ca7f3206c4f8faa3cc743e92609b49c1d83f/tinydb-4.8.2-py3-none-any.whl", hash = "sha256:f97030ee5cbc91eeadd1d7af07ab0e48ceb04aa63d4a983adbaca4cba16e86c3", size = 24888, upload-time = "2024-10-12T15:23:59.833Z" },
 ]
 
 [[package]]

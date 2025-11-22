@@ -28,6 +28,7 @@ logger.add(
 
 from reader3 import Book, BookMetadata, ChapterContent, TOCEntry
 from chat_service import chat_service, ChatRequest
+from config_manager import get_config_manager, ModelConfig
 
 app = FastAPI()
 
@@ -56,7 +57,7 @@ app.mount("/js", StaticFiles(directory="frontend/js"), name="frontend_js")
 app.mount("/css", StaticFiles(directory="frontend/css"), name="frontend_css")
 
 # Mount frontend API modules directory
-app.mount("/frontend-api", StaticFiles(directory="frontend/api"), name="frontend_api")
+app.mount("/frontend-api", StaticFiles(directory="frontend-api"), name="frontend_api")
 
 # Frontend page serving
 @app.get("/")
@@ -451,6 +452,120 @@ async def chat_with_content_stream(
             yield JSONServerSentEvent(data={"error": f"Failed to process request: {str(e)}"}, event="error")
 
     return EventSourceResponse(generate_chat_response(), ping=20, media_type="text/event-stream")
+
+# Configuration Management API Endpoints
+
+class ConfigRequest(BaseModel):
+    """Request model for configuration updates."""
+    api_key: Optional[str] = None
+    base_url: Optional[str] = None
+    model_name: Optional[str] = None
+    temperature: Optional[float] = None
+    max_tokens: Optional[int] = None
+
+
+@app.get("/api/config")
+async def get_config():
+    """Get current model configuration."""
+    try:
+        config_manager = get_config_manager()
+        config = config_manager.get_model_config()
+
+        if not config:
+            return JSONResponse(
+                status_code=404,
+                content={"error": "No configuration found"}
+            )
+
+        # Don't expose the full API key in the response for security
+        response_data = config.model_dump()
+        if response_data.get("api_key"):
+            response_data["api_key"] = "******" + response_data["api_key"][-4:] if len(response_data["api_key"]) > 4 else "******"
+
+        return JSONResponse(content=response_data)
+
+    except Exception as e:
+        logger.error(f"Error getting config: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Failed to get configuration"}
+        )
+
+
+@app.post("/api/config")
+async def update_config(config_request: ConfigRequest):
+    """Update model configuration."""
+    try:
+        config_manager = get_config_manager()
+
+        # Prepare updates dictionary
+        updates = {}
+        if config_request.api_key is not None:
+            updates["api_key"] = config_request.api_key
+        if config_request.base_url is not None:
+            updates["base_url"] = config_request.base_url
+        if config_request.model_name is not None:
+            updates["model_name"] = config_request.model_name
+        if config_request.temperature is not None:
+            updates["temperature"] = config_request.temperature
+        if config_request.max_tokens is not None:
+            updates["max_tokens"] = config_request.max_tokens
+
+        if not updates:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "No configuration updates provided"}
+            )
+
+        success = config_manager.update_model_config(updates)
+
+        if success:
+            return JSONResponse(content={"message": "Configuration updated successfully"})
+        else:
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Failed to update configuration"}
+            )
+
+    except Exception as e:
+        logger.error(f"Error updating config: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Failed to update configuration"}
+        )
+
+
+@app.post("/api/config/reset")
+async def reset_config():
+    """Reset configuration to defaults."""
+    try:
+        config_manager = get_config_manager()
+
+        # Create default configuration
+        default_config = ModelConfig(
+            api_key="",
+            base_url="https://api.openai.com/v1",
+            model_name="gpt-4o-mini",
+            temperature=0.7,
+            max_tokens=32000
+        )
+
+        success = config_manager.save_model_config(default_config)
+
+        if success:
+            return JSONResponse(content={"message": "Configuration reset to defaults"})
+        else:
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Failed to reset configuration"}
+            )
+
+    except Exception as e:
+        logger.error(f"Error resetting config: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Failed to reset configuration"}
+        )
 
 @app.post("/api/upload-book")
 async def upload_book(epub_file: UploadFile = File(...)):

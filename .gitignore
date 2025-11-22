@@ -48,6 +48,7 @@ Thumbs.db
 books/
 *.epub
 uploads/
+data/
 
 # Environment and configuration files
 .env
