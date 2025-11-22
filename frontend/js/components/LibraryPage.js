@@ -32,9 +32,8 @@ export function LibraryPage() {
       this.isDarkMode = localStorage.getItem('darkMode') === 'true';
       this.applyDarkMode();
 
-      // Load configuration and check if model is configured
-      await this.loadSettings();
-      await this.checkConfigStatus();
+      // Load configuration and check if model is configured (combined to avoid duplicate API calls)
+      await this.loadSettingsAndCheckStatus();
 
       await this.loadBooks();
     },
@@ -195,6 +194,34 @@ export function LibraryPage() {
     },
 
     // Settings related methods
+    async loadSettingsAndCheckStatus() {
+      try {
+        const config = await configAPI.getConfig();
+
+        // Load settings into form, but keep masked API key if present
+        this.settingsForm = {
+          api_key: config.api_key && !config.api_key.startsWith('******') ? config.api_key : '',
+          base_url: config.base_url || 'https://api.openai.com/v1',
+          model_name: config.model_name || 'gpt-4o-mini',
+          temperature: config.temperature || 0.7,
+          max_tokens: config.max_tokens || 32000
+        };
+
+        // Check if API key is properly configured
+        // If api_key is masked (starts with "******"), it means it's configured
+        if (!config.api_key || config.api_key.trim() === '') {
+          // API key is not configured, show settings modal
+          this.showSettingsModal = true;
+          window.app.showToast('请先配置AI模型设置', 'error');
+        }
+      } catch (error) {
+        console.error('Failed to load settings and check status:', error);
+        // If we can't get config, show settings modal
+        this.showSettingsModal = true;
+        window.app.showToast('请先配置AI模型设置', 'error');
+      }
+    },
+
     async loadSettings() {
       try {
         const config = await configAPI.getConfig();
