@@ -29,41 +29,145 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="./css/styles.css">
+
+    <!-- i18n Module (must load before app) -->
+    <script src="./locales/index.js"></script>
 </head>
 <body class="bg-slate-50 text-gray-900 transition-colors duration-300">
-    <div id="app" x-data="LibraryPage()" x-init="init()" class="min-h-screen min-w-[320px]">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-slate-50 flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Main App (hidden initially) -->
+    <div id="app" x-data="LibraryPage()" x-init="init()" class="min-h-screen min-w-[320px]" style="display: none;">
         <!-- Header -->
         <header class="bg-gradient-to-r from-gray-700 to-gray-800 border-b border-gray-600 shadow-lg">
             <div class="container mx-auto px-4 sm:px-6 py-3">
                 <div class="flex justify-between items-center">
-                    <h1 class="text-3xl font-bold text-white">📚 My Library</h1>
+                    <h1 class="text-3xl font-bold text-white" data-i18n="common.header.title">📚 My Library</h1>
                     <div class="flex items-center gap-3">
+                        <!-- Language Selector -->
+                        <div class="relative" x-data="{
+                            languageOpen: false,
+                            currentDisplay: 'English',
+                            async init() {
+                                // Load saved language from server on initialization
+                                try {
+                                    const response = await fetch('/api/config/language');
+                                    const data = await response.json();
+                                    const savedLang = data.language || 'en';
+                                    this.currentDisplay = savedLang === 'zh-CN' ? '简体中文' : 'English';
+
+                                    // Set language in i18n if available
+                                    if (window.i18n) {
+                                        await window.i18n.setLanguage(savedLang);
+                                    }
+                                } catch (error) {
+                                    console.log('Failed to load language config, using default');
+                                }
+
+                                // Listen for language changes from other components
+                                window.addEventListener('i18n:languageChanged', (e) => {
+                                    this.currentDisplay = e.detail.langInfo.nativeName || 'English';
+                                });
+                            },
+                            async setLanguage(langCode, displayName) {
+                                this.currentDisplay = displayName;
+                                this.languageOpen = false;
+
+                                // Save to TinyDB first
+                                try {
+                                    await fetch('/api/config/language', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ language: langCode })
+                                    });
+                                } catch (error) {
+                                    console.error('Failed to save language config:', error);
+                                }
+
+                                // Then set language in i18n
+                                if (window.i18n) {
+                                    await window.i18n.setLanguage(langCode);
+                                }
+                            }
+                        }" x-init="init()">
+                            <button
+                                @click="languageOpen = !languageOpen"
+                                @click.away="languageOpen = false"
+                                class="btn bg-gray-600 hover:bg-gray-700 text-white shadow-md hover:shadow-lg flex items-center gap-2"
+                                data-i18n-title="common.header.language"
+                                title="Language"
+                            >
+                                <span>🌐</span>
+                                <span class="hidden sm:inline" x-text="currentDisplay">English</span>
+                                <svg class="w-4 h-4 transition-transform" :class="languageOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+
+                            <!-- Language Dropdown -->
+                            <div
+                                x-show="languageOpen"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 transform scale-95"
+                                x-transition:enter-end="opacity-100 transform scale-100"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100 transform scale-100"
+                                x-transition:leave-end="opacity-0 transform scale-95"
+                                class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-50"
+                            >
+                                <!-- English Option -->
+                                <button
+                                    @click="setLanguage('en', 'English')"
+                                    class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 first:rounded-t-lg"
+                                    :class="currentDisplay === 'English' ? 'bg-gray-100 dark:bg-gray-700 text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-700 dark:text-gray-300'"
+                                >
+                                    <span>🇺🇸 English</span>
+                                </button>
+                                <!-- Chinese Option -->
+                                <button
+                                    @click="setLanguage('zh-CN', '简体中文')"
+                                    class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 last:rounded-b-lg"
+                                    :class="currentDisplay === '简体中文' ? 'bg-gray-100 dark:bg-gray-700 text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-700 dark:text-gray-300'"
+                                >
+                                    <span>🇨🇳 简体中文</span>
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Settings Button -->
                         <button
                             @click="toggleSettings()"
                             class="btn bg-gray-600 hover:bg-gray-700 text-white shadow-md hover:shadow-lg"
-                            title="设置"
+                            data-i18n-title="common.header.settings"
+                            title="Settings"
                         >
                             <span>⚙️</span>
-                            <span class="hidden sm:inline">设置</span>
+                            <span class="hidden sm:inline" data-i18n="common.header.settings">Settings</span>
                         </button>
                         <!-- Dark Mode Toggle -->
                         <button
                             @click="toggleDarkMode()"
                             class="btn bg-gray-600 hover:bg-gray-700 text-white shadow-md hover:shadow-lg"
+                            :data-i18n-title="isDarkMode ? 'dark.switch_to_light' : 'dark.switch_to_dark'"
                             :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
                         >
                             <span x-show="!isDarkMode">🌙</span>
                             <span x-show="isDarkMode">☀️</span>
-                            <span class="hidden sm:inline" x-show="!isDarkMode">深色</span>
-                            <span class="hidden sm:inline" x-show="isDarkMode">浅色</span>
+                            <span class="hidden sm:inline" x-show="!isDarkMode" data-i18n="common.header.dark_mode">Dark</span>
+                            <span class="hidden sm:inline" x-show="isDarkMode" data-i18n="common.header.light_mode">Light</span>
                         </button>
                         <button
                             @click="openUploadModal()"
                             class="btn bg-gray-600 hover:bg-gray-700 text-white shadow-md hover:shadow-lg"
                         >
                             <span>📚</span>
-                            <span class="hidden sm:inline">上传图书</span>
+                            <span class="hidden sm:inline" data-i18n="common.header.upload_book">Upload Book</span>
                         </button>
                     </div>
                 </div>
@@ -75,25 +179,25 @@
             <!-- Loading State -->
             <div x-show="loading" class="text-center py-16">
                 <div class="inline-block w-8 h-8 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin mb-4"></div>
-                <p class="text-gray-600">Loading books...</p>
+                <p class="text-gray-600 dark:text-gray-400" data-i18n="main.loading_books">Loading books...</p>
             </div>
 
             <!-- Error State -->
             <div x-show="error" class="text-center py-16">
                 <div class="text-4xl mb-4">📚</div>
-                <h2 class="text-xl font-semibold text-gray-900 mb-2">Failed to Load Books</h2>
-                <p class="text-gray-600 mb-4" x-text="error"></p>
-                <button @click="loadBooks()" class="btn bg-gray-600 hover:bg-gray-700 text-white">Retry</button>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2" data-i18n="main.error_title">Failed to Load Books</h2>
+                <p class="text-gray-600 dark:text-gray-400 mb-4" x-text="error"></p>
+                <button @click="loadBooks()" class="btn bg-gray-600 hover:bg-gray-700 text-white" data-i18n="main.retry">Retry</button>
             </div>
 
             <!-- Empty State -->
             <div x-show="!loading && !error && books.length === 0" class="text-center py-16">
                 <div class="text-4xl mb-4 opacity-30">📚</div>
-                <h2 class="text-xl font-semibold text-gray-900 mb-2">No books yet</h2>
-                <p class="text-gray-600 mb-6">Upload your first EPUB file to get started with your personal reading library.</p>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2" data-i18n="main.no_books_title">No books yet</h2>
+                <p class="text-gray-600 dark:text-gray-400 mb-6" data-i18n="main.no_books_desc">Upload your first EPUB file to get started with your personal reading library.</p>
                 <button @click="openUploadModal()" class="btn bg-gray-600 hover:bg-gray-700 text-white">
                     <span>📤</span>
-                    <span>Upload Your First Book</span>
+                    <span data-i18n="main.upload_first_book">Upload Your First Book</span>
                 </button>
             </div>
 
@@ -115,7 +219,10 @@
                                 </div>
                                 <div>
                                     <span>📖</span>
-                                    <span x-text="book.chapters + ' sections'"></span>
+                                    <span>
+                                        <span x-text="book.chapters"></span>
+                                        <span data-i18n="library.book.sections"> sections</span>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -126,12 +233,12 @@
                                 class="btn bg-gray-700 hover:bg-gray-800 text-white shadow-md hover:shadow-lg text-sm"
                             >
                                 <span>📖</span>
-                                <span>Read Book</span>
+                                <span data-i18n="library.book.read_book">Read Book</span>
                             </button>
 
                             <div class="text-xs text-gray-500">
                                 <span x-text="book.image_count || 0"></span>
-                                <span> images</span>
+                                <span data-i18n="library.book.images"> images</span>
                             </div>
                         </div>
                     </article>
@@ -151,11 +258,12 @@
             >
                 <!-- Modal Header -->
                 <div class="settings-dialog-header flex justify-between items-center p-6 border-b border-gray-200">
-                    <h2 class="text-xl font-semibold text-white">Upload EPUB Book</h2>
+                    <h2 class="text-xl font-semibold text-white" data-i18n="library.upload.title">Upload EPUB Book</h2>
                     <button
                         @click="closeUploadModal()"
                         class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200 text-lg leading-none"
-                        title="Close dialog"
+                        data-i18n-title="common.actions.close"
+                        title="Close"
                     >
                         ×
                     </button>
@@ -163,7 +271,7 @@
 
                 <!-- Modal Body -->
                 <div class="p-6">
-                    <p class="text-gray-600 mb-6">Select an EPUB file to process and add to your library.</p>
+                    <p class="text-gray-600 mb-6" data-i18n="library.upload.desc">Select an EPUB file to process and add to your library.</p>
 
                     <!-- Upload Area -->
                     <div
@@ -186,17 +294,17 @@
 
                         <div class="text-4xl mb-4">📚</div>
                         <div class="mb-4 text-gray-600">
-                            Drag and drop your EPUB file here, or
+                            <span data-i18n="library.upload.drag_drop">Drag and drop your EPUB file here, or</span>
                         </div>
-                        <button class="btn bg-gray-500 hover:bg-gray-600 text-white border-0">
+                        <button class="btn bg-gray-500 hover:bg-gray-600 text-white border-0" data-i18n="library.upload.choose_file">
                             Choose File
                         </button>
                     </div>
 
                     <!-- File Info -->
-                    <div x-show="selectedFile" class="mt-4 p-3 bg-gray-50 rounded-lg">
-                        <strong>Selected file:</strong>
-                        <span x-text="selectedFile?.name"></span>
+                    <div x-show="selectedFile" class="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <strong class="text-gray-700 dark:text-gray-300" data-i18n="library.upload.selected_file">Selected file:</strong>
+                        <span class="text-gray-900 dark:text-gray-100" x-text="selectedFile?.name"></span>
                     </div>
 
                     <!-- Upload Status -->
@@ -211,8 +319,8 @@
                         :disabled="!selectedFile || uploading"
                         class="w-full mt-6 btn btn-success disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <span x-show="!uploading">📤 Upload Book</span>
-                        <span x-show="uploading">⏳ Processing...</span>
+                        <span x-show="!uploading"><span class="mr-2">📤</span><span data-i18n="common.actions.upload">Upload</span></span>
+                        <span x-show="uploading">⏳ <span data-i18n="library.upload.uploading">Processing...</span></span>
                     </button>
                 </div>
             </div>
@@ -230,11 +338,12 @@
             >
                 <!-- Modal Header -->
                 <div class="settings-dialog-header flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-600">
-                    <h2 class="text-xl font-semibold text-white">⚙️ 系统设置</h2>
+                    <h2 class="text-xl font-semibold text-white" data-i18n="library.settings.title"></h2>
                     <button
                         @click="closeSettingsModal()"
                         class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 text-lg leading-none"
-                        title="关闭设置"
+                        data-i18n-title="common.actions.close"
+                        title="Close"
                     >
                         ×
                     </button>
@@ -246,7 +355,7 @@
                     <div>
                         <!-- Section Title -->
                         <div class="mb-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">模型设置</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2" data-i18n="library.settings.model_config"></h3>
                             <div class="border-t border-gray-200 dark:border-gray-600"></div>
                         </div>
 
@@ -255,13 +364,15 @@
                                 <!-- API Key -->
                                 <div class="space-y-2">
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        API Key <span class="text-red-500">*</span>
+                                        <span data-i18n="library.settings.api_key_required">API Key *</span>
                                     </label>
                                     <input
                                         type="password"
                                         x-model="settingsForm.api_key"
                                         class="form-input"
-                                        placeholder="请输入API密钥"
+                                         placeholder="Enter API key"
+                                        data-i18n-placeholder="library.form.enter_api_key"
+                                        placeholder="Enter API key"
                                         required
                                     />
                                 </div>
@@ -269,12 +380,14 @@
                                 <!-- Base URL -->
                                 <div class="space-y-2">
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Base URL <span class="text-red-500">*</span>
+                                        <span data-i18n="library.settings.base_url">Base URL *</span>
                                     </label>
                                     <input
                                         type="url"
                                         x-model="settingsForm.base_url"
                                         class="form-input"
+                                         placeholder="https://api.openai.com/v1"
+                                        data-i18n-placeholder="library.form.base_url_placeholder"
                                         placeholder="https://api.openai.com/v1"
                                         required
                                     />
@@ -283,28 +396,61 @@
                                 <!-- Model Name -->
                                 <div class="space-y-2">
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Model Name <span class="text-red-500">*</span>
+                                        <span data-i18n="library.settings.model_name_required">Model Name *</span>
                                     </label>
                                     <input
                                         type="text"
                                         x-model="settingsForm.model_name"
                                         class="form-input"
+                                       placeholder="gpt-4o-mini"
+                                        data-i18n-placeholder="library.form.model_name_placeholder"
                                         placeholder="gpt-4o-mini"
                                         required
                                     />
                                 </div>
 
-                                <!-- Optional Parameters -->
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <!-- Advanced Settings Toggle -->
+                                <div class="mt-6 border-t border-gray-200 dark:border-gray-600">
+                                    <a
+                                        href="javascript:void(0)"
+                                        @click="showAdvancedSettings = !showAdvancedSettings"
+                                        class="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-decoration-none"
+                                    >
+                                        <svg
+                                            class="w-4 h-4 transition-transform duration-200"
+                                            :class="showAdvancedSettings ? 'rotate-180' : ''"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                        <span x-show="!showAdvancedSettings" data-i18n="library.settings.more_config">More Configuration</span>
+                                        <span x-show="showAdvancedSettings" data-i18n="library.settings.less_config">Less Configuration</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 ml-1" data-i18n="library.settings.config_hint">(Temperature & Max Tokens)</span>
+                                    </a>
+                                </div>
+
+                                <!-- Advanced Settings (Hidden by default) -->
+                                <div
+                                    x-show="showAdvancedSettings"
+                                    x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0 transform -translate-y-2"
+                                    x-transition:enter-end="opacity-100 transform translate-y-0"
+                                    x-transition:leave="transition ease-in duration-150"
+                                    x-transition:leave-start="opacity-100 transform translate-y-0"
+                                    x-transition:leave-end="opacity-0 transform -translate-y-2"
+                                    class="mt-4 space-y-4"
+                                >
                                     <!-- Temperature -->
                                     <div class="space-y-2">
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            Temperature (可选)
-                                        </label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="library.settings.temperature"></label>
                                         <input
                                             type="number"
                                             x-model="settingsForm.temperature"
                                             class="form-input"
+                                            placeholder="0.7"
+                                            data-i18n-placeholder="library.form.temp_placeholder"
                                             placeholder="0.7"
                                             min="0"
                                             max="2"
@@ -314,13 +460,13 @@
 
                                     <!-- Max Tokens -->
                                     <div class="space-y-2">
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            Max Tokens (可选)
-                                        </label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" data-i18n="library.settings.max_tokens"></label>
                                         <input
                                             type="number"
                                             x-model="settingsForm.max_tokens"
                                             class="form-input"
+                                           placeholder="32000"
+                                            data-i18n-placeholder="library.form.max_tokens_placeholder"
                                             placeholder="32000"
                                             min="1"
                                         />
@@ -329,31 +475,23 @@
                             </div>
 
                             <!-- Form Actions -->
-                            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
+                            <div class="flex justify-end gap-3 mt-8">
                                 <button
                                     type="button"
-                                    @click="resetSettings()"
-                                    class="btn bg-gray-500 hover:bg-gray-600 text-white w-full sm:w-auto"
+                                    @click="closeSettingsModal()"
+                                    class="btn bg-gray-300 hover:bg-gray-400 text-gray-700 flex-1 sm:flex-none"
+                                    data-i18n="common.actions.cancel"
                                 >
-                                    重置为默认值
+                                    Cancel
                                 </button>
-                                <div class="flex gap-3 w-full sm:w-auto">
-                                    <button
-                                        type="button"
-                                        @click="closeSettingsModal()"
-                                        class="btn bg-gray-300 hover:bg-gray-400 text-gray-700 flex-1 sm:flex-none"
-                                    >
-                                        取消
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        :disabled="savingSettings"
-                                        class="btn bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 flex-1 sm:flex-none"
-                                    >
-                                        <span x-show="!savingSettings">保存设置</span>
-                                        <span x-show="savingSettings">保存中...</span>
-                                    </button>
-                                </div>
+                                <button
+                                    type="submit"
+                                    :disabled="savingSettings"
+                                    class="btn bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 flex-1 sm:flex-none"
+                                >
+                                    <span x-show="!savingSettings" data-i18n="common.actions.save">Save</span>
+                                    <span x-show="savingSettings" data-i18n="library.settings.saving">Saving...</span>
+                                </button>
                             </div>
                         </form>
                     </div>

@@ -23,10 +23,49 @@ export function LibraryPage() {
       max_tokens: 32000
     },
     savingSettings: false,
+    showAdvancedSettings: false,
 
     async init() {
       // Debug: Log that init is being called
       console.log('LibraryPage init() called');
+
+      // Set a timeout to prevent infinite loading
+      const loadingTimeout = setTimeout(() => {
+        console.warn('Loading timeout - showing app anyway');
+        const loadingScreen = document.getElementById('loading-screen');
+        const app = document.getElementById('app');
+        if (loadingScreen) loadingScreen.style.display = 'none';
+        if (app) app.style.display = 'block';
+      }, 10000); // 10 second timeout
+
+      // Wait for i18n to be ready before proceeding (with timeout)
+      if (!window.i18n || !window.i18n.isReady()) {
+        console.log('Waiting for i18n to be ready...');
+        try {
+          await new Promise((resolve, reject) => {
+            const checkReady = () => {
+              if (window.i18n && window.i18n.isReady()) {
+                console.log('i18n is ready!');
+                clearTimeout(loadingTimeout);
+                resolve();
+              } else {
+                setTimeout(checkReady, 100);
+              }
+            };
+            const timeout = setTimeout(() => {
+              console.warn('i18n ready timeout - proceeding anyway');
+              clearTimeout(loadingTimeout);
+              resolve();
+            }, 5000); // 5 second timeout for i18n
+            checkReady();
+          });
+        } catch (error) {
+          console.error('Error waiting for i18n:', error);
+        }
+      } else {
+        console.log('i18n already ready');
+        clearTimeout(loadingTimeout);
+      }
 
       // Load dark mode preference
       this.isDarkMode = localStorage.getItem('darkMode') === 'true';
@@ -36,6 +75,34 @@ export function LibraryPage() {
       await this.loadSettingsAndCheckStatus();
 
       await this.loadBooks();
+
+      // Hide loading screen and show app
+      const loadingScreen = document.getElementById('loading-screen');
+      const app = document.getElementById('app');
+      if (loadingScreen) loadingScreen.style.display = 'none';
+      if (app) app.style.display = 'block';
+
+      // Listen for language changes
+      window.addEventListener('i18n:pageUpdated', () => {
+        // Re-bind any dynamic translations when language changes
+        this.updateTranslations();
+      });
+    },
+
+    updateTranslations() {
+      // Force update of any dynamically rendered content
+      // This will be called when language changes
+      console.log('Updating translations in LibraryPage');
+
+      // Force update settings dialog title if it's currently open
+      if (this.showSettingsModal) {
+        setTimeout(() => {
+          const titleElement = document.querySelector('h2[data-i18n="library.settings.title"]');
+          if (titleElement && window.i18n && window.i18n.isReady()) {
+            titleElement.textContent = window.i18n.t('library.settings.title');
+          }
+        }, 10);
+      }
     },
 
     async loadBooks() {
@@ -76,7 +143,7 @@ export function LibraryPage() {
         if (!file.name.toLowerCase().endsWith('.epub')) {
           this.uploadStatus = {
             type: 'error',
-            message: 'Please select a valid EPUB file'
+            message: window.i18n.t('library.upload.valid_epub')
           };
           return;
         }
@@ -108,7 +175,7 @@ export function LibraryPage() {
         } else {
           this.uploadStatus = {
             type: 'error',
-            message: 'Please select a valid EPUB file'
+            message: window.i18n.t('library.upload.valid_epub')
           };
         }
       }
@@ -126,7 +193,7 @@ export function LibraryPage() {
       this.uploading = true;
       this.uploadStatus = {
         type: 'processing',
-        message: 'Processing EPUB file, please wait...'
+        message: window.i18n.t('library.upload.processing')
       };
 
       try {
@@ -212,13 +279,21 @@ export function LibraryPage() {
         if (!config.api_key || config.api_key.trim() === '') {
           // API key is not configured, show settings modal
           this.showSettingsModal = true;
-          window.app.showToast('请先配置AI模型设置', 'error');
+          if (window.i18n && window.i18n.isReady()) {
+            window.app.showToast(window.i18n.t('library.toast.config_required'), 'error');
+          } else {
+            window.app.showToast('Please configure AI model settings first', 'error');
+          }
         }
       } catch (error) {
         console.error('Failed to load settings and check status:', error);
         // If we can't get config, show settings modal
         this.showSettingsModal = true;
-        window.app.showToast('请先配置AI模型设置', 'error');
+        if (window.i18n && window.i18n.isReady()) {
+          window.app.showToast(window.i18n.t('library.toast.config_required'), 'error');
+        } else {
+          window.app.showToast('Please configure AI model settings first', 'error');
+        }
       }
     },
 
@@ -246,13 +321,21 @@ export function LibraryPage() {
         if (!config.api_key || config.api_key.trim() === '') {
           // API key is not configured, show settings modal
           this.showSettingsModal = true;
-          window.app.showToast('请先配置AI模型设置', 'error');
+          if (window.i18n && window.i18n.isReady()) {
+            window.app.showToast(window.i18n.t('library.toast.config_required'), 'error');
+          } else {
+            window.app.showToast('Please configure AI model settings first', 'error');
+          }
         }
       } catch (error) {
         console.error('Failed to check config status:', error);
         // If we can't get config, show settings modal
         this.showSettingsModal = true;
-        window.app.showToast('请先配置AI模型设置', 'error');
+        if (window.i18n && window.i18n.isReady()) {
+          window.app.showToast(window.i18n.t('library.toast.config_required'), 'error');
+        } else {
+          window.app.showToast('Please configure AI model settings first', 'error');
+        }
       }
     },
 
@@ -273,23 +356,14 @@ export function LibraryPage() {
       this.savingSettings = true;
       try {
         await configAPI.updateConfig(this.settingsForm);
-        window.app.showToast('设置保存成功', 'success');
+        window.app.showToast(window.i18n.t('library.settings.save_success'), 'success');
         this.closeSettingsModal();
       } catch (error) {
-        window.app.showToast(error.message || '保存设置失败', 'error');
+        window.app.showToast(error.message || window.i18n.t('library.settings.save_error'), 'error');
       } finally {
         this.savingSettings = false;
       }
     },
 
-    async resetSettings() {
-      try {
-        await configAPI.resetConfig();
-        await this.loadSettings();
-        window.app.showToast('设置已重置为默认值', 'success');
-      } catch (error) {
-        window.app.showToast(error.message || '重置设置失败', 'error');
-      }
-    }
-  };
+    };
 }

@@ -248,7 +248,7 @@
              style="position: fixed !important; bottom: 6rem !important; right: 2rem !important; width: 420px !important; height: calc(100vh - 10rem) !important; z-index: 9999 !important;">
             <!-- Chat Header -->
             <div class="chat-header">
-                <span>📚 AI 阅读助手</span>
+                <span data-i18n="chat.title">📚 AI 阅读助手</span>
             </div>
 
             <!-- Chat Messages -->
@@ -302,17 +302,17 @@
                                 <button
                                     @click="copyMessage(message.content)"
                                     class="flex items-center space-x-1"
-                                    :title="'复制' + (message.role === 'user' ? '你的消息' : 'AI回复')"
+                                    :title="(message.role === 'user' ? window.i18n.t('chat.copy_user_message') : window.i18n.t('chat.copy_ai_message'))"
                                 >
-                                    📋 <span class="hidden sm:inline">复制</span>
+                                    📋 <span class="hidden sm:inline" data-i18n="chat.copy_message">复制</span>
                                 </button>
                                 <button
                                     @click="generateImage(message.content)"
                                     class="flex items-center space-x-1"
-                                    title="保存为图片"
+                                    :title="window.i18n.t('chat.save_as_image')"
                                     x-show="message.role === 'assistant'"
                                 >
-                                    🖼️ <span class="hidden sm:inline">图片</span>
+                                    🖼️ <span class="hidden sm:inline" data-i18n="chat.save_as_image_text">图片</span>
                                 </button>
                             </div>
                         </div>
@@ -324,27 +324,33 @@
             <div class="chat-shortcuts bg-gray-50 p-2 border-b border-gray-200">
                 <div class="grid grid-cols-3 gap-1 text-xs">
                     <button @click="handleShortcut('summarize')"
-                            class="p-2 text-center text-gray-700 hover:bg-white rounded-lg border border-transparent hover:border-gray-300 transition-all font-medium">
+                            class="p-2 text-center text-gray-700 hover:bg-white rounded-lg border border-transparent hover:border-gray-300 transition-all font-medium"
+                            data-i18n="chat.shortcuts.summarize">
                         📝 智能总结
                     </button>
                     <button @click="handleShortcut('notes')"
-                            class="p-2 text-center text-gray-700 hover:bg-white rounded-lg border border-transparent hover:border-gray-300 transition-all font-medium">
+                            class="p-2 text-center text-gray-700 hover:bg-white rounded-lg border border-transparent hover:border-gray-300 transition-all font-medium"
+                            data-i18n="chat.shortcuts.notes">
                         📋 学习笔记
                     </button>
                     <button @click="handleShortcut('analysis')"
-                            class="p-2 text-center text-gray-700 hover:bg-white rounded-lg border border-transparent hover:border-gray-300 transition-all font-medium">
+                            class="p-2 text-center text-gray-700 hover:bg-white rounded-lg border border-transparent hover:border-gray-300 transition-all font-medium"
+                            data-i18n="chat.shortcuts.analysis">
                         🔍 深度分析
                     </button>
                     <button @click="handleShortcut('critical')"
-                            class="p-2 text-center text-gray-700 hover:bg-white rounded-lg border border-transparent hover:border-gray-300 transition-all font-medium">
+                            class="p-2 text-center text-gray-700 hover:bg-white rounded-lg border border-transparent hover:border-gray-300 transition-all font-medium"
+                            data-i18n="chat.shortcuts.critical">
                         🧠 批判思考
                     </button>
                     <button @click="handleShortcut('connection')"
-                            class="p-2 text-center text-gray-700 hover:bg-white rounded-lg border border-transparent hover:border-gray-300 transition-all font-medium">
+                            class="p-2 text-center text-gray-700 hover:bg-white rounded-lg border border-transparent hover:border-gray-300 transition-all font-medium"
+                            data-i18n="chat.shortcuts.connection">
                         🔗 知识关联
                     </button>
                     <button @click="handleShortcut('qa')"
-                            class="p-2 text-center text-gray-700 hover:bg-white rounded-lg border border-transparent hover:border-gray-300 transition-all font-medium">
+                            class="p-2 text-center text-gray-700 hover:bg-white rounded-lg border border-transparent hover:border-gray-300 transition-all font-medium"
+                            data-i18n="chat.shortcuts.qa">
                         ❓ 智能问答
                     </button>
                 </div>
@@ -357,6 +363,7 @@
                         id="chatInput"
                         x-model="currentMessage"
                         @keydown.enter="sendMessage($event)"
+                        data-i18n-placeholder="chat.type_message"
                         placeholder="输入你的问题..."
                         rows="1"
                         class="flex-1 resize-none border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-gray-500"
@@ -375,6 +382,9 @@
         </div>
 
       </div>
+
+    <!-- i18n Module (must load first) -->
+    <script src="/locales/index.js"></script>
 
     <!-- JavaScript Modules -->
     <script type="module" src="/js/reader-app.js"></script>

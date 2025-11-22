@@ -153,6 +153,42 @@ class ConfigManager:
         except Exception:
             return False
 
+    def save_language_config(self, language: str) -> bool:
+        """Save language configuration to database.
+
+        Args:
+            language: Language code (e.g., 'en', 'zh-CN')
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Remove any existing language config
+            self.config_table.remove(Query().type == "language")
+
+            # Save new language config
+            self.config_table.insert({
+                "type": "language",
+                "language": language
+            })
+            return True
+        except Exception:
+            return False
+
+    def get_language_config(self) -> Optional[str]:
+        """Get language configuration from database.
+
+        Returns:
+            Language code if found, None otherwise
+        """
+        try:
+            result = self.config_table.get(Query().type == "language")
+            if result and "language" in result:
+                return result["language"]
+            return None
+        except Exception:
+            return None
+
     def export_config(self) -> Dict[str, Any]:
         """Export all configuration as dictionary.
 

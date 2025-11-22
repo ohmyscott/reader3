@@ -58,6 +58,8 @@ app.mount("/css", StaticFiles(directory="frontend/css"), name="frontend_css")
 
 # Mount frontend API modules directory
 app.mount("/frontend-api", StaticFiles(directory="frontend-api"), name="frontend_api")
+# Mount frontend locales directory for i18n files
+app.mount("/locales", StaticFiles(directory="frontend/locales"), name="frontend_locales")
 
 # Frontend page serving
 @app.get("/")
@@ -463,6 +465,10 @@ class ConfigRequest(BaseModel):
     temperature: Optional[float] = None
     max_tokens: Optional[int] = None
 
+class LanguageRequest(BaseModel):
+    """Request model for language configuration updates."""
+    language: str
+
 
 @app.get("/api/config")
 async def get_config():
@@ -565,6 +571,60 @@ async def reset_config():
         return JSONResponse(
             status_code=500,
             content={"error": "Failed to reset configuration"}
+        )
+
+@app.post("/api/config/language")
+async def update_language_config(language_request: LanguageRequest):
+    """Update language configuration and persist to TinyDB."""
+    try:
+        config_manager = get_config_manager()
+
+        # Validate language code
+        valid_languages = ['en', 'zh-CN']
+        if language_request.language not in valid_languages:
+            return JSONResponse(
+                status_code=400,
+                content={"error": f"Invalid language code. Supported languages: {valid_languages}"}
+            )
+
+        # Save language preference to TinyDB
+        success = config_manager.save_language_config(language_request.language)
+
+        if success:
+            logger.info(f"Language configuration updated to: {language_request.language}")
+            return JSONResponse(content={
+                "message": "Language configuration updated successfully",
+                "language": language_request.language
+            })
+        else:
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Failed to update language configuration"}
+            )
+
+    except Exception as e:
+        logger.error(f"Error updating language config: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Failed to update language configuration"}
+        )
+
+@app.get("/api/config/language")
+async def get_language_config():
+    """Get current language configuration."""
+    try:
+        config_manager = get_config_manager()
+        language = config_manager.get_language_config()
+
+        return JSONResponse(content={
+            "language": language or "en"  # Default to 'en' if not set
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting language config: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Failed to get language configuration"}
         )
 
 @app.post("/api/upload-book")

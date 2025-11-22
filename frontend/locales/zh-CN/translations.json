@@ -1,0 +1,196 @@
+{
+  "common": {
+    "header": {
+      "title": "📚 我的图书馆",
+      "settings": "设置",
+      "dark_mode": "深色",
+      "light_mode": "浅色",
+      "upload_book": "上传图书",
+      "language": "语言"
+    },
+    "navigation": {
+      "back_to_library": "返回图书馆",
+      "previous": "上一页",
+      "next": "下一页"
+    },
+    "actions": {
+      "close": "关闭",
+      "cancel": "取消",
+      "save": "保存",
+      "retry": "重试",
+      "send": "发送",
+      "copy": "复制",
+      "upload": "上传",
+      "download": "下载",
+      "edit": "编辑",
+      "delete": "删除"
+    },
+    "states": {
+      "loading": "加载中...",
+      "saving": "保存中...",
+      "processing": "处理中...",
+      "thinking": "思考中...",
+      "error": "错误",
+      "success": "成功",
+      "warning": "警告"
+    },
+    "messages": {
+      "success": "操作成功完成",
+      "error": "发生错误",
+      "validation_required": "此字段为必填项",
+      "network_error": "网络连接失败",
+      "try_again": "请重试"
+    },
+    "themes": {
+      "switch_to_dark": "切换到深色模式",
+      "switch_to_light": "切换到浅色模式"
+    },
+    "accessibility": {
+      "open_menu": "打开菜单",
+      "close_menu": "关闭菜单",
+      "open_settings": "打开设置",
+      "toggle_language": "切换语言选择器"
+    }
+  },
+  "library": {
+    "title": "我的图书馆",
+    "loading_books": "正在加载图书...",
+    "error_title": "加载图书失败",
+    "no_books_title": "还没有图书",
+    "no_books_desc": "上传您的第一个 EPUB 文件，开始使用个人阅读图书馆。",
+    "upload_first_book": "上传第一本书",
+    "book": {
+      "sections": "章节",
+      "images": "张图片",
+      "read_book": "阅读图书"
+    },
+    "upload": {
+      "title": "上传 EPUB 图书",
+      "desc": "选择一个 EPUB 文件进行处理并添加到您的图书馆。",
+      "drag_drop": "将您的 EPUB 文件拖放到此处，或者",
+      "choose_file": "选择文件",
+      "selected_file": "已选择文件：",
+      "uploading": "处理中...",
+      "upload_success": "上传成功！",
+      "upload_error": "上传失败",
+      "valid_epub": "请选择有效的 EPUB 文件",
+      "select_file_first": "请先选择文件",
+      "processing": "正在处理 EPUB 文件，请稍候..."
+    },
+    "settings": {
+      "title": "系统设置",
+      "model_config": "模型配置",
+      "api_key": "API 密钥",
+      "api_key_required": "API 密钥 *",
+      "base_url": "Base URL",
+      "base_url_required": "Base URL *",
+      "model_name": "模型名称",
+      "model_name_required": "模型名称 *",
+      "temperature": "Temperature (可选)",
+      "max_tokens": "Max Tokens (可选)",
+      "more_config": "更多配置",
+      "less_config": "更少配置",
+      "config_hint": "(Temperature & Max Tokens)",
+      "saving": "保存中...",
+      "save_success": "设置保存成功",
+      "save_error": "设置保存失败"
+    },
+    "validation": {
+      "required": "*"
+    },
+    "toast": {
+      "config_required": "请先配置AI模型设置",
+      "settings_loaded": "设置加载成功",
+      "config_error": "请先配置AI模型设置"
+    },
+    "form": {
+      "enter_api_key": "请输入API密钥",
+      "base_url_placeholder": "https://api.openai.com/v1",
+      "model_name_placeholder": "gpt-4o-mini",
+      "temp_placeholder": "0.7",
+      "max_tokens_placeholder": "32000"
+    }
+  },
+  "reader": {
+    "navigation": {
+      "back_to_library": "返回图书馆",
+      "table_of_contents": "目录",
+      "toc_toggle": "切换目录",
+      "close_toc": "关闭",
+      "loading_content": "正在加载内容...",
+      "chapter": "第"
+    },
+    "content": {
+      "section_info": "第 {{current}} 节，共 {{total}} 节",
+      "no_content": "暂无内容",
+      "loading_error": "内容加载失败",
+      "retry_load": "重试"
+    },
+    "controls": {
+      "font_size": "字体大小",
+      "increase_font": "增大",
+      "decrease_font": "减小",
+      "theme": "主题",
+      "light_theme": "浅色",
+      "dark_theme": "深色",
+      "auto_theme": "自动"
+    },
+    "errors": {
+      "book_not_found": "未找到图书",
+      "chapter_not_found": "未找到章节",
+      "invalid_url": "无效的URL格式",
+      "load_failed": "内容加载失败"
+    },
+    "accessibility": {
+      "open_toc": "打开目录",
+      "close_toc": "关闭目录",
+      "navigate_chapter": "导航到章节",
+      "adjust_font_size": "调整字体大小"
+    }
+  },
+  "chat": {
+    "title": "📚 AI 阅读助手",
+    "type_message": "输入你的问题...",
+    "send": "发送",
+    "user": "您",
+    "assistant": "助手",
+    "thinking": "思考中...",
+    "error": "获取响应失败",
+    "copy_message": "复制",
+    "copy_user_message": "复制你的消息",
+    "copy_ai_message": "复制AI回复",
+    "save_as_image": "保存为图片",
+    "save_as_image_text": "图片",
+    "regenerate_response": "重新生成响应",
+    "generic_error": "抱歉，发生了一个错误。请稍后重试。",
+    "copy_failed": "复制消息失败",
+    "image_generation_failed": "图片生成失败",
+    "copy_image_failed": "复制失败，请重试",
+    "image_generation_fallback": "图片生成失败，已下载为文本文件",
+    "config_load_failed": "配置加载失败",
+    "settings_save_success": "设置保存成功",
+    "settings_save_failed": "设置保存失败",
+    "settings_reset_failed": "设置重置失败",
+    "welcome": "你好！我是你的AI阅读助手。我可以帮助你：\n\n- 📝 **智能总结**：快速生成章节核心内容\n- 📋 **学习笔记**：创建结构化学习材料\n- ❓ **智能问答**：解答任何阅读疑问\n- 🔍 **深度分析**：挖掘文本深层含义\n- 🧠 **批判思考**：激发思辨能力\n- 🔗 **知识关联**：构建知识网络\n\n你想探索本章的什么内容？",
+    "shortcuts": {
+      "summarize": "📝 智能总结",
+      "notes": "📋 学习笔记",
+      "analysis": "🔍 深度分析",
+      "critical": "🧠 批判思考",
+      "connection": "🔗 知识关联",
+      "qa": "❓ 智能问答"
+    },
+    "user_messages": {
+      "notes": "📋 请为我生成本章的学习笔记",
+      "analysis": "🔍 请对本章进行深度分析",
+      "critical": "🧠 请提供本章的批判思考问题",
+      "connection": "🔗 请建立本章的知识关联"
+    },
+    "loading_messages": {
+      "notes": "📋 正在为您生成学习笔记",
+      "analysis": "🔍 正在进行深度分析",
+      "critical": "🧠 正在生成批判思考问题",
+      "connection": "🔗 正在建立知识关联"
+    }
+  }
+}

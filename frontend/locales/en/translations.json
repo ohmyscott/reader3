@@ -1,0 +1,196 @@
+{
+  "common": {
+    "header": {
+      "title": "📚 My Library",
+      "settings": "Settings",
+      "dark_mode": "Dark",
+      "light_mode": "Light",
+      "upload_book": "Upload Book",
+      "language": "Language"
+    },
+    "navigation": {
+      "back_to_library": "Back to Library",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "actions": {
+      "close": "Close",
+      "cancel": "Cancel",
+      "save": "Save",
+      "retry": "Retry",
+      "send": "Send",
+      "copy": "Copy",
+      "upload": "Upload",
+      "download": "Download",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "states": {
+      "loading": "Loading...",
+      "saving": "Saving...",
+      "processing": "Processing...",
+      "thinking": "Thinking...",
+      "error": "Error",
+      "success": "Success",
+      "warning": "Warning"
+    },
+    "messages": {
+      "success": "Operation completed successfully",
+      "error": "An error occurred",
+      "validation_required": "This field is required",
+      "network_error": "Network connection failed",
+      "try_again": "Please try again"
+    },
+    "themes": {
+      "switch_to_dark": "Switch to dark mode",
+      "switch_to_light": "Switch to light mode"
+    },
+    "accessibility": {
+      "open_menu": "Open menu",
+      "close_menu": "Close menu",
+      "open_settings": "Open settings",
+      "toggle_language": "Toggle language selector"
+    }
+  },
+  "library": {
+    "title": "My Library",
+    "loading_books": "Loading books...",
+    "error_title": "Failed to Load Books",
+    "no_books_title": "No books yet",
+    "no_books_desc": "Upload your first EPUB file to get started with your personal reading library.",
+    "upload_first_book": "Upload Your First Book",
+    "book": {
+      "sections": "sections",
+      "images": "images",
+      "read_book": "Read Book"
+    },
+    "upload": {
+      "title": "Upload EPUB Book",
+      "desc": "Select an EPUB file to process and add to your library.",
+      "drag_drop": "Drag and drop your EPUB file here, or",
+      "choose_file": "Choose File",
+      "selected_file": "Selected file:",
+      "uploading": "Processing...",
+      "upload_success": "Upload successful!",
+      "upload_error": "Upload failed",
+      "valid_epub": "Please select a valid EPUB file",
+      "select_file_first": "Please select a file first",
+      "processing": "Processing EPUB file, please wait..."
+    },
+    "settings": {
+      "title": "System Settings",
+      "model_config": "Model Configuration",
+      "api_key": "API Key",
+      "api_key_required": "API Key *",
+      "base_url": "Base URL",
+      "base_url_required": "Base URL *",
+      "model_name": "Model Name",
+      "model_name_required": "Model Name *",
+      "temperature": "Temperature (optional)",
+      "max_tokens": "Max Tokens (optional)",
+      "more_config": "More Configuration",
+      "less_config": "Less Configuration",
+      "config_hint": "(Temperature & Max Tokens)",
+      "saving": "Saving...",
+      "save_success": "Settings saved successfully",
+      "save_error": "Failed to save settings"
+    },
+    "validation": {
+      "required": "*"
+    },
+    "toast": {
+      "config_required": "Please configure AI model settings first",
+      "settings_loaded": "Settings loaded successfully",
+      "config_error": "Please configure AI model settings"
+    },
+    "form": {
+      "enter_api_key": "Enter API key",
+      "base_url_placeholder": "https://api.openai.com/v1",
+      "model_name_placeholder": "gpt-4o-mini",
+      "temp_placeholder": "0.7",
+      "max_tokens_placeholder": "32000"
+    }
+  },
+  "reader": {
+    "navigation": {
+      "back_to_library": "Back to Library",
+      "table_of_contents": "Table of Contents",
+      "toc_toggle": "Toggle Table of Contents",
+      "close_toc": "Close",
+      "loading_content": "Loading content...",
+      "chapter": "Chapter"
+    },
+    "content": {
+      "section_info": "Section {{current}} of {{total}}",
+      "no_content": "No content available",
+      "loading_error": "Failed to load content",
+      "retry_load": "Retry"
+    },
+    "controls": {
+      "font_size": "Font Size",
+      "increase_font": "Increase",
+      "decrease_font": "Decrease",
+      "theme": "Theme",
+      "light_theme": "Light",
+      "dark_theme": "Dark",
+      "auto_theme": "Auto"
+    },
+    "errors": {
+      "book_not_found": "Book not found",
+      "chapter_not_found": "Chapter not found",
+      "invalid_url": "Invalid URL format",
+      "load_failed": "Failed to load content"
+    },
+    "accessibility": {
+      "open_toc": "Open table of contents",
+      "close_toc": "Close table of contents",
+      "navigate_chapter": "Navigate to chapter",
+      "adjust_font_size": "Adjust font size"
+    }
+  },
+  "chat": {
+    "title": "📚 AI Reading Assistant",
+    "type_message": "Type your question...",
+    "send": "Send",
+    "user": "You",
+    "assistant": "Assistant",
+    "thinking": "Thinking...",
+    "error": "Failed to get response",
+    "copy_message": "Copy",
+    "copy_user_message": "Copy your message",
+    "copy_ai_message": "Copy AI reply",
+    "save_as_image": "Save as image",
+    "save_as_image_text": "Image",
+    "regenerate_response": "Regenerate response",
+    "generic_error": "Sorry, an error occurred. Please try again later.",
+    "copy_failed": "Failed to copy message",
+    "image_generation_failed": "Failed to generate image",
+    "copy_image_failed": "Copy failed, please try again",
+    "image_generation_fallback": "Image generation failed, downloaded as text file",
+    "config_load_failed": "Failed to load configuration",
+    "settings_save_success": "Settings saved successfully",
+    "settings_save_failed": "Failed to save settings",
+    "settings_reset_failed": "Failed to reset settings",
+    "welcome": "Hello! I'm your AI reading assistant. I can help you:\n\n- 📝 **Smart Summary**: Quickly generate chapter core content\n- 📋 **Study Notes**: Create structured learning materials\n- ❓ **Smart Q&A**: Answer any reading questions\n- 🔍 **Deep Analysis**: Explore deeper meanings in text\n- 🧠 **Critical Thinking**: Inspire critical thinking abilities\n- 🔗 **Knowledge Connection**: Build knowledge networks\n\nWhat would you like to explore about this chapter?",
+    "shortcuts": {
+      "summarize": "📝 Smart Summary",
+      "notes": "📋 Study Notes",
+      "analysis": "🔍 Deep Analysis",
+      "critical": "🧠 Critical Thinking",
+      "connection": "🔗 Knowledge Connection",
+      "qa": "❓ Smart Q&A"
+    },
+    "user_messages": {
+      "notes": "📋 Please generate study notes for this chapter",
+      "analysis": "🔍 Please perform a deep analysis of this chapter",
+      "critical": "🧠 Please provide critical thinking questions for this chapter",
+      "connection": "🔗 Please establish knowledge connections for this chapter"
+    },
+    "loading_messages": {
+      "notes": "📋 Generating study notes for you",
+      "analysis": "🔍 Performing deep analysis",
+      "critical": "🧠 Generating critical thinking questions",
+      "connection": "🔗 Building knowledge connections"
+    }
+  }
+}
