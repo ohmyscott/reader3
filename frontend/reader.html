@@ -41,15 +41,97 @@
         <div id="reading-progress" class="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-600 to-gray-700 z-50 transition-all duration-300"
                :style="`width: ${readingProgress}%`"></div>
 
+        <!-- Mobile TOC Toggle Bar -->
+        <div class="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/60 dark:border-gray-600/60">
+            <div class="flex items-center justify-between p-3">
+                <button
+                    @click="toggleToc()"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                    <span class="text-sm font-medium">目录</span>
+                </button>
+                <a href="/" class="px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium transition-colors duration-200">
+                    ← 返回书库
+                </a>
+            </div>
+        </div>
+
+        <!-- Mobile TOC Overlay -->
+        <div
+            x-show="showToc"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="lg:hidden fixed inset-0 z-50"
+            @click.self="toggleToc()"
+        >
+            <!-- Backdrop -->
+            <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+
+            <!-- TOC Panel -->
+            <div class="absolute top-0 left-0 bottom-0 w-80 max-w-full bg-white dark:bg-gray-800 shadow-xl overflow-hidden">
+                <div class="flex flex-col h-full">
+                    <!-- TOC Header -->
+                    <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-600">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">目录</h2>
+                        <button
+                            @click="toggleToc()"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- TOC Content -->
+                    <nav class="flex-1 overflow-y-auto p-4">
+                        <template x-for="(item, index) in toc" :key="index">
+                            <div class="toc-section">
+                                <!-- Main chapter -->
+                                <a
+                                    :href="`/read/${encodeURIComponent(bookId)}/${getChapterIndex(item.href)}`"
+                                    @click="toggleToc()"
+                                    class="toc-link"
+                                    :class="getTocItemClass(item.href) ? 'active' : ''"
+                                    style="position: relative;"
+                                >
+                                    <span x-text="item.title"></span>
+                                </a>
+
+                                <!-- Sub-chapters -->
+                                <template x-for="(child, childIndex) in item.children" :key="childIndex">
+                                    <a
+                                        :href="`/read/${encodeURIComponent(bookId)}/${getChapterIndex(child.href)}`"
+                                        @click="toggleToc()"
+                                        class="toc-sub-link"
+                                        :class="getTocItemClass(child.href) ? 'active' : ''"
+                                    >
+                                        <span x-text="child.title"></span>
+                                    </a>
+                                </template>
+                            </div>
+                        </template>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
         <!-- Reading Container -->
         <div class="reader-container">
-            <!-- Sidebar with Table of Contents -->
-            <aside class="sidebar">
-                <div class="p-4 border-b border-gray-200">
+            <!-- Desktop Sidebar with Table of Contents -->
+            <aside class="hidden lg:block sidebar">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-600">
                     <a href="/" class="text-gray-600 hover:text-gray-800 font-medium text-sm mb-3 block dark:text-gray-400 dark:hover:text-gray-200">
                         ← Back to Library
                     </a>
-                    <h2 class="text-lg font-semibold text-gray-900">目录</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">目录</h2>
                 </div>
 
                 <!-- Table of Contents -->
@@ -83,9 +165,9 @@
 
             <!-- Main Content Area -->
             <main class="main-content">
-                <div class="content-wrapper">
+                <div class="content-wrapper lg:pt-0 pt-12">
                     <!-- Book Title Header -->
-                    <header class="text-center mb-12 pb-8 border-b border-gray-200">
+                    <header class="text-center mb-12 pb-8 border-b border-gray-200 dark:border-gray-600">
                         <h1 class="text-3xl font-bold text-gray-900 mb-2 leading-tight" x-text="book?.metadata?.title || ''"></h1>
                         <div class="text-sm text-gray-600 space-x-4">
                             <template x-if="book?.metadata?.authors">

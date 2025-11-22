@@ -15,6 +15,7 @@ export function ReaderPage() {
     loading: true,
     error: null,
     readingProgress: 0,
+    showToc: false,
 
     // Chat state
     chatOpen: false,
@@ -125,6 +126,11 @@ export function ReaderPage() {
           if (input) input.focus();
         }, 300);
       }
+    },
+
+    toggleToc() {
+      console.log('toggleToc called, current showToc:', this.showToc);
+      this.showToc = !this.showToc;
     },
 
     closeChat() {

@@ -17,11 +17,6 @@ body.bg-gray-900 {
   background-color: #111827;
 }
 
-.dark .card {
-  background-color: #1f2937;
-  border-color: #374151;
-}
-
 .dark .modal-overlay {
   background-color: rgba(0, 0, 0, 0.7);
 }
@@ -111,6 +106,11 @@ body.bg-gray-900 {
   border: 1px solid #e5e7eb;
 }
 
+.dark .card {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -162,6 +162,10 @@ body.bg-gray-900 {
   overflow: hidden;
   font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   background-color: #f9fafb;
+}
+
+.dark .reader-container {
+  background-color: #111827;
 }
 
 .sidebar {
@@ -953,4 +957,23 @@ body.bg-gray-900 {
   .form-actions .btn {
     width: 100%;
   }
+}
+
+/* Settings Dialog Header */
+.settings-dialog-header {
+  background: linear-gradient(to right, #4b5563, #374151) !important;
+  color: white !important;
+  padding: 1rem !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  font-weight: 600 !important;
+  position: relative;
+  z-index: 9999;
+}
+
+/* Dark mode for settings dialog header */
+.dark .settings-dialog-header {
+  background: linear-gradient(to right, #374151, #1f2937) !important;
+}
 }
