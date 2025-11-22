@@ -459,6 +459,7 @@ async def chat_with_content_stream(
 
 class ConfigRequest(BaseModel):
     """Request model for configuration updates."""
+    provider: Optional[str] = None
     api_key: Optional[str] = None
     base_url: Optional[str] = None
     model_name: Optional[str] = None
@@ -510,6 +511,8 @@ async def update_config(config_request: ConfigRequest):
 
         # Prepare updates dictionary
         updates = {}
+        if config_request.provider is not None:
+            updates["provider"] = config_request.provider
         if config_request.api_key is not None:
             updates["api_key"] = config_request.api_key
         if config_request.base_url is not None:

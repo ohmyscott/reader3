@@ -16,6 +16,7 @@ export function LibraryPage() {
     showSettingsModal: false,
     activeTab: 'model',
     settingsForm: {
+      provider: 'openai',
       api_key: '',
       base_url: 'https://api.openai.com/v1',
       model_name: 'gpt-4o-mini',
@@ -274,6 +275,7 @@ export function LibraryPage() {
 
         // Load settings into form, but keep masked API key if present
         this.settingsForm = {
+          provider: config.provider || 'openai',
           api_key: config.api_key && !config.api_key.startsWith('******') ? config.api_key : '',
           base_url: config.base_url || 'https://api.openai.com/v1',
           model_name: config.model_name || 'gpt-4o-mini',
@@ -321,6 +323,7 @@ export function LibraryPage() {
 
         // Load settings into form, but keep masked API key if present
         this.settingsForm = {
+          provider: config.provider || 'openai',
           api_key: config.api_key && !config.api_key.startsWith('******') ? config.api_key : '',
           base_url: config.base_url || 'https://api.openai.com/v1',
           model_name: config.model_name || 'gpt-4o-mini',
@@ -378,6 +381,7 @@ export function LibraryPage() {
       try {
         // Save model settings
         const modelSettings = {
+          provider: this.settingsForm.provider,
           api_key: this.settingsForm.api_key,
           base_url: this.settingsForm.base_url,
           model_name: this.settingsForm.model_name,
@@ -421,6 +425,33 @@ export function LibraryPage() {
         console.error('Failed to change language:', error);
         if (window.app && window.app.showToast) {
           window.app.showToast('Failed to change language', 'error');
+        }
+      }
+    },
+
+    // Handle provider change
+    async handleProviderChange(provider) {
+      try {
+        // Update provider
+        this.settingsForm.provider = provider;
+
+        // Auto-fill base URL based on provider
+        switch (provider) {
+          case 'ollama':
+            this.settingsForm.base_url = 'http://localhost:11434/v1';
+            break;
+          case 'lmstudio':
+            this.settingsForm.base_url = 'http://127.0.0.1:1234/v1';
+            break;
+          case 'openai':
+          default:
+            this.settingsForm.base_url = 'https://api.openai.com/v1';
+            break;
+        }
+      } catch (error) {
+        console.error('Failed to change provider:', error);
+        if (window.app && window.app.showToast) {
+          window.app.showToast('Failed to change provider', 'error');
         }
       }
     },

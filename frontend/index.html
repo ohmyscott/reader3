@@ -352,20 +352,59 @@
 
                         <form @submit.prevent="saveSettings()">
                             <div class="space-y-6">
+                                <!-- Provider Selector -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Provider
+                                    </label>
+                                    <div class="flex flex-wrap gap-2">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="provider" value="openai" x-model="settingsForm.provider" @change="handleProviderChange('openai')" class="sr-only">
+                                            <div class="flex items-center px-4 py-2 border-2 rounded-lg cursor-pointer transition-all duration-200"
+                                                 :class="settingsForm.provider === 'openai'
+                                                    ? 'bg-gray-600 text-white border-gray-600'
+                                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'">
+                                                <span class="text-sm font-medium">OpenAI</span>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="provider" value="lmstudio" x-model="settingsForm.provider" @change="handleProviderChange('lmstudio')" class="sr-only">
+                                            <div class="flex items-center px-4 py-2 border-2 rounded-lg cursor-pointer transition-all duration-200"
+                                                 :class="settingsForm.provider === 'lmstudio'
+                                                    ? 'bg-gray-600 text-white border-gray-600'
+                                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'">
+                                                <span class="text-sm font-medium">LM Studio</span>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="provider" value="ollama" x-model="settingsForm.provider" @change="handleProviderChange('ollama')" class="sr-only">
+                                            <div class="flex items-center px-4 py-2 border-2 rounded-lg cursor-pointer transition-all duration-200"
+                                                 :class="settingsForm.provider === 'ollama'
+                                                    ? 'bg-gray-600 text-white border-gray-600'
+                                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'">
+                                                <span class="text-sm font-medium">Ollama</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <!-- API Key -->
                                 <div class="space-y-2">
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        <span data-i18n="library.settings.api_key_required">API Key *</span>
+                                        <span x-show="settingsForm.provider === 'openai'" data-i18n="library.settings.api_key_required">API Key *</span>
+                                        <span x-show="settingsForm.provider !== 'openai'" data-i18n="library.settings.api_key">API Key (Optional)</span>
                                     </label>
                                     <input
                                         type="password"
                                         x-model="settingsForm.api_key"
                                         class="form-input"
-                                         placeholder="Enter API key"
-                                        data-i18n-placeholder="library.form.enter_api_key"
+                                        :required="settingsForm.provider === 'openai'"
                                         placeholder="Enter API key"
-                                        required
+                                        data-i18n-placeholder="library.form.enter_api_key"
                                     />
+                                    <p x-show="settingsForm.provider !== 'openai'" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        API key is optional for <span x-text="settingsForm.provider === 'lmstudio' ? 'LM Studio' : 'Ollama'"></span>
+                                    </p>
                                 </div>
 
                                 <!-- Base URL -->

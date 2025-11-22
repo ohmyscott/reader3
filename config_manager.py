@@ -13,7 +13,8 @@ import json
 
 class ModelConfig(BaseModel):
     """Model configuration for AI settings."""
-    api_key: str = Field(..., description="OpenAI API key")
+    provider: str = Field(default="openai", description="AI provider (openai, lmstudio, ollama)")
+    api_key: Optional[str] = Field(default="", description="API key (required for OpenAI, optional for others)")
     base_url: str = Field(default="https://api.openai.com/v1", description="API base URL")
     model_name: str = Field(default="gpt-4o-mini", description="Model name")
     temperature: Optional[float] = Field(default=0.7, ge=0.0, le=2.0, description="Temperature for generation")

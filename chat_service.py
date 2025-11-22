@@ -68,14 +68,18 @@ class ChatService:
             return
 
         # Validate configuration
-        if not config.api_key:
-            logger.error("API key not configured. Please configure the AI model settings.")
+        # API key is optional for Ollama and LM Studio
+        if not config.api_key and config.provider == "openai":
+            logger.error("API key not configured for OpenAI. Please configure the AI model settings.")
             self.client = None
             return
 
+        # For Ollama and LM Studio, use empty string as API key if not provided
+        api_key = config.api_key or ""
+
         # Store configuration
         self.base_url = config.base_url
-        self.api_key = config.api_key
+        self.api_key = api_key
         self.model = config.model_name
         self.temperature = config.temperature or 0.7
         self.max_tokens = config.max_tokens or 2000
