@@ -17,3 +17,8 @@ dependencies = [
     "loguru>=0.7.0",
     "python-multipart>=0.0.20",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "flake8>=6.0.0",
+]
