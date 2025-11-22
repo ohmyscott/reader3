@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reader3 - Digital Library</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body class="bg-slate-50 text-gray-900 transition-colors duration-300">
+    <div id="app" x-data="{
+    app: window.app,
+    view: new URLSearchParams(window.location.search).get('view') || 'library',
+    bookId: new URLSearchParams(window.location.search).get('book') || '',
+    chapterIndex: parseInt(new URLSearchParams(window.location.search).get('chapter')) || 0,
+    init() {
+      this.app.init();
+
+      // Listen for browser back/forward
+      window.addEventListener('popstate', () => {
+        this.updateFromUrl();
+      });
+    },
+    updateFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      this.view = params.get('view') || 'library';
+      this.bookId = params.get('book') || '';
+      this.chapterIndex = parseInt(params.get('chapter')) || 0;
+    },
+    navigateToReader(bookId, chapterIndex = 0) {
+      const params = new URLSearchParams({
+        view: 'reader',
+        book: bookId,
+        chapter: chapterIndex
+      });
+      history.pushState(null, '', `/?${params.toString()}`);
+      this.updateFromUrl();
+    },
+    navigateToLibrary() {
+      history.pushState(null, '', '/');
+      this.updateFromUrl();
+    }
+  }" x-init="init()">
+        <!-- Library Page Component -->
+        <div
+          x-show="view === 'library'"
+          x-data="LibraryPage()"
+        >
+          <!-- Header -->
+          <header class="bg-gradient-to-r from-gray-700 to-gray-800 border-b border-gray-600 shadow-lg">
+            <div class="container mx-auto px-6 py-4">
+              <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold text-white">📚 Library</h1>
+                <div class="flex items-center gap-3">
+                  <!-- Dark Mode Toggle -->
+                  <button
+                    @click="toggleDarkMode()"
+                    class="p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-all duration-200"
+                    :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+                  >
+                    <span x-show="!isDarkMode">🌙</span>
+                    <span x-show="isDarkMode">☀️</span>
+                  </button>
+                  <button
+                    @click="openUploadModal()"
+                    class="btn bg-gray-600 hover:bg-gray-700 text-white shadow-md hover:shadow-lg"
+                  >
+                    <span>📚</span>
+                    <span>Upload Book</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <!-- Main Content -->
+          <main class="container mx-auto px-6 py-8">
+            <!-- Loading State -->
+            <div x-show="loading" class="text-center py-16">
+              <div class="inline-block w-8 h-8 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin mb-4"></div>
+              <p class="text-gray-600">Loading books...</p>
+            </div>
+
+            <!-- Error State -->
+            <div x-show="error" class="text-center py-16">
+              <div class="text-4xl mb-4">📚</div>
+              <h2 class="text-xl font-semibold text-gray-900 mb-2">Failed to Load Books</h2>
+              <p class="text-gray-600 mb-4" x-text="error"></p>
+              <button @click="loadBooks()" class="btn bg-gray-600 hover:bg-gray-700 text-white">Retry</button>
+            </div>
+
+            <!-- Empty State -->
+            <div x-show="!loading && !error && books.length === 0" class="text-center py-16">
+              <div class="text-4xl mb-4 opacity-30">📚</div>
+              <h2 class="text-xl font-semibold text-gray-900 mb-2">No books yet</h2>
+              <p class="text-gray-600 mb-6">Upload your first EPUB file to get started with your personal reading library.</p>
+              <button @click="openUploadModal()" class="btn bg-gray-600 hover:bg-gray-700 text-white">
+                <span>📤</span>
+                <span>Upload Your First Book</span>
+              </button>
+            </div>
+
+            <!-- Books Grid -->
+            <div x-show="!loading && !error && books.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <template x-for="book in books" :key="book.id">
+                <article class="card p-6 transition-all duration-200 hover:shadow-lg hover:scale-105 animate-fade-in bg-gradient-to-br from-slate-50 to-gray-50 hover:from-slate-100 hover:to-gray-100 dark:from-gray-800 dark:to-gray-700 dark:hover:from-gray-700 dark:hover:to-gray-600">
+                  <div>
+                    <h3
+                      class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 dark:text-gray-100"
+                      :title="book.title"
+                      x-text="book.title"
+                    ></h3>
+
+                    <div class="space-y-2 text-sm text-gray-600 mb-4 dark:text-gray-300">
+                      <div>
+                        <span>✍️</span>
+                        <span x-text="book.author"></span>
+                      </div>
+                      <div>
+                        <span>📖</span>
+                        <span x-text="book.chapters + ' sections'"></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex justify-between items-center">
+                    <button
+                      @click="openReader(book.id)"
+                      class="btn bg-gray-700 hover:bg-gray-800 text-white shadow-md hover:shadow-lg text-sm"
+                    >
+                      <span>📖</span>
+                      <span>Read Book</span>
+                    </button>
+
+                    <div class="text-xs text-gray-500">
+                      <span x-text="book.image_count || 0"></span>
+                      <span> images</span>
+                    </div>
+                  </div>
+                </article>
+              </template>
+            </div>
+          </main>
+
+          <!-- Upload Modal -->
+          <div
+            x-show="showUploadModal"
+            class="modal-overlay"
+            @click="closeUploadModal()"
+          >
+            <div
+              class="modal-content max-w-lg"
+              @click.stop
+            >
+              <!-- Modal Header -->
+              <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">Upload EPUB Book</h2>
+                <button
+                  @click="closeUploadModal()"
+                  class="text-gray-400 hover:text-gray-600 text-xl leading-none"
+                >
+                  ×
+                </button>
+              </div>
+
+              <!-- Modal Body -->
+              <div class="p-6">
+                <p class="text-gray-600 mb-6">Select an EPUB file to process and add to your library.</p>
+
+                <!-- Upload Area -->
+                <div
+                  class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors cursor-pointer"
+                  :class="{
+                    'border-gray-400 bg-gray-50': uploadStatus?.type === 'processing'
+                  }"
+                  @click="$refs.fileInput.click()"
+                  @dragover="handleDragOver"
+                  @dragleave="handleDragLeave"
+                  @drop="handleDrop"
+                >
+                  <input
+                    ref="fileInput"
+                    type="file"
+                    accept=".epub"
+                    @change="handleFileSelect"
+                    class="hidden"
+                  >
+
+                  <div class="text-4xl mb-4">📚</div>
+                  <div class="mb-4 text-gray-600">
+                    Drag and drop your EPUB file here, or
+                  </div>
+                  <button class="btn bg-gray-500 hover:bg-gray-600 text-white border-0">
+                    Choose File
+                  </button>
+                </div>
+
+                <!-- File Info -->
+                <div x-show="selectedFile" class="mt-4 p-3 bg-gray-50 rounded-lg">
+                  <strong>Selected file:</strong>
+                  <span x-text="selectedFile?.name"></span>
+                </div>
+
+                <!-- Upload Status -->
+                <div x-show="uploadStatus" class="mt-4 p-4 rounded-lg border"
+                     :class="getStatusColor(uploadStatus?.type)">
+                  <p x-text="uploadStatus?.message"></p>
+                </div>
+
+                <!-- Upload Button -->
+                <button
+                  @click="uploadBook()"
+                  :disabled="!selectedFile || uploading"
+                  class="w-full mt-6 btn btn-success disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span x-show="!uploading">📤 Upload Book</span>
+                  <span x-show="uploading">⏳ Processing...</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reader Page Component -->
+        <div
+          x-show="view === 'reader'"
+          x-data="ReaderPage({ bookId: bookId, chapterIndex: chapterIndex })"
+        >
+          <!-- Reading Progress Indicator -->
+          <div id="reading-progress" class="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-600 to-gray-700 z-50 transition-all duration-300"
+                 :style="`width: ${readingProgress}%`"></div>
+
+          <!-- Reading Container -->
+          <div class="reader-container">
+            <!-- Sidebar with Table of Contents -->
+            <aside class="sidebar">
+              <div class="p-4 border-b border-gray-200">
+                <button @click="document.getElementById('app')._x_dataStack[0].navigateToLibrary()" class="text-gray-600 hover:text-gray-800 font-medium text-sm mb-3 block dark:text-gray-400 dark:hover:text-gray-200 text-left w-auto">
+                  ← Back to Library
+                </button>
+                <h2 class="text-lg font-semibold text-gray-900">目录</h2>
+              </div>
+
+              <!-- Table of Contents -->
+              <nav class="p-4 overflow-y-auto flex-1">
+                <template x-for="(item, index) in toc" :key="index">
+                  <div class="mb-2">
+                    <a
+                      href="#"
+                      @click="navigateToChapter(item.order)"
+                      class="block p-2 rounded-lg text-sm hover:bg-gray-100 transition-colors"
+                      :class="getTocItemClass(item.href)"
+                    >
+                      <span x-text="item.title"></span>
+                    </a>
+
+                    <!-- Sub-chapters -->
+                    <template x-for="(child, childIndex) in item.children" :key="childIndex">
+                      <a
+                        href="#"
+                        @click="navigateToChapter(child.order)"
+                        class="block p-2 rounded-lg text-sm hover:bg-gray-100 transition-colors ml-4"
+                        :class="getTocItemClass(child.href)"
+                      >
+                        <span x-text="child.title"></span>
+                      </a>
+                    </template>
+                  </div>
+                </template>
+              </nav>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+              <div class="content-wrapper">
+                <!-- Book Title Header -->
+                <header class="text-center mb-12 pb-8 border-b border-gray-200">
+                  <h1 class="text-3xl font-bold text-gray-900 mb-2 leading-tight" x-text="book?.metadata?.title || ''"></h1>
+                  <div class="text-sm text-gray-600 space-x-4">
+                    <template x-if="book?.metadata?.authors">
+                      <span>✍️</span>
+                      <span x-text="book.metadata.authors.join(', ')"></span>
+                    </template>
+                    <span x-text="`${chapterIndex + 1}/${book?.chapters || 0}`" class="text-xs opacity-75"></span>
+                  </div>
+                </header>
+
+                <!-- Loading State -->
+                <div x-show="loading" class="text-center py-16">
+                  <div class="inline-block w-8 h-8 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin mb-4"></div>
+                  <p class="text-gray-600">Loading chapter...</p>
+                </div>
+
+                <!-- Error State -->
+                <div x-show="error" class="text-center py-16">
+                  <div class="text-4xl mb-4">📚</div>
+                  <h2 class="text-xl font-semibold text-gray-900 mb-2">Failed to Load Chapter</h2>
+                  <p class="text-gray-600 mb-4" x-text="error"></p>
+                  <button @click="loadChapter()" class="btn bg-gray-600 hover:bg-gray-700 text-white">Retry</button>
+                </div>
+
+                <!-- Chapter Content -->
+                <div x-show="!loading && !error && chapter" class="book-content">
+                  <div x-html="chapter?.content || 'Loading chapter content...'"></div>
+
+                  <!-- Chapter Navigation -->
+                  <nav class="flex justify-between items-center mt-8 pt-8 border-t border-gray-200">
+                    <button
+                      @click="navigatePrevious()"
+                      :disabled="chapterIndex <= 0"
+                      class="btn bg-gray-200 hover:bg-gray-300 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300"
+                    >
+                      <span>←</span>
+                      <span>Previous</span>
+                    </button>
+
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                      Section {{ chapterIndex + 1 }} of {{ book?.chapters || 0 }}
+                    </div>
+
+                    <button
+                      @click="navigateNext()"
+                      :disabled="chapterIndex >= (book?.chapters || 1) - 1"
+                      class="btn bg-gray-200 hover:bg-gray-300 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300"
+                    >
+                      <span>Next</span>
+                      <span>→</span>
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </main>
+          </div>
+
+          <!-- Chat Button -->
+          <button
+            @click="toggleChat()"
+            :class="chatOpen ? 'bg-red-500' : 'bg-gray-600'"
+            class="chat-btn"
+          >
+            💬
+          </button>
+
+          <!-- Chat Dialog -->
+          <div x-show="chatOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+               class="chat-dialog open">
+            <!-- Chat Header -->
+            <div class="chat-header">
+              <span>📚 AI 阅读助手</span>
+              <button @click="toggleChat()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1">
+                ✕
+              </button>
+            </div>
+
+            <!-- Chat Shortcuts -->
+            <div class="bg-gray-50 p-3 border-b border-gray-200 flex-shrink-0">
+              <div class="text-xs font-semibold text-gray-700 mb-2">快捷指令</div>
+              <div class="grid grid-cols-3 gap-2">
+                <button @click="handleShortcut('summarize')" class="text-xs p-2 bg-white border border-gray-300 rounded hover:bg-gray-50 hover:border-gray-400">
+                  📝 总结
+                </button>
+                <button @click="handleShortcut('notes')" class="text-xs p-2 bg-white border border-gray-300 rounded hover:bg-gray-50 hover:border-gray-400">
+                  📋 笔记
+                </button>
+                <button @click="handleShortcut('qa')" class="text-xs p-2 bg-white border border-gray-300 rounded hover:bg-gray-50 hover:border-gray-400">
+                  ❓ 提问
+                </button>
+                <button @click="handleShortcut('analysis')" class="text-xs p-2 bg-white border border-gray-300 rounded hover:bg-gray-50 hover:border-gray-400">
+                  🔍 深度分析
+                </button>
+                <button @click="handleShortcut('critical')" class="text-xs p-2 bg-white border border-gray-300 rounded hover:bg-gray-50 hover:border-gray-400">
+                  🧠 批判思考
+                </button>
+                <button @click="handleShortcut('connection')" class="text-xs p-2 bg-white border border-gray-300 rounded hover:bg-gray-50 hover:border-gray-400">
+                  🔗 知识关联
+                </button>
+                <button @click="clearChat()" class="text-xs p-2 bg-white border border-gray-300 rounded hover:bg-gray-100">
+                  🗑️ 清空对话
+                </button>
+              </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="chatMessages" class="chat-messages overflow-y-auto p-4 space-y-4">
+              <template x-for="message in messages" :key="message.id">
+                <div :class="message.role === 'user' ? 'text-right' : 'text-left'" class="message">
+                  <div
+                    :class="message.role === 'user' ? 'bg-gray-700 text-white rounded-br-lg' : 'bg-gray-100 text-gray-900 border border-gray-300 rounded-bl-lg'"
+                    class="inline-block max-w-[85%] p-3 rounded-2xl break-words"
+                  >
+                    <!-- Markdown rendering for assistant messages -->
+                    <div x-show="message.role === 'assistant'" x-html="message.content"></div>
+                    <div x-show="message.role === 'user'" x-text="message.content"></div>
+
+                    <!-- Streaming indicator -->
+                    <div x-show="message.streaming" class="flex justify-end mt-1">
+                      <div class="flex space-x-1">
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                      </div>
+                    </div>
+
+                    <!-- Message actions -->
+                    <div x-show="!message.streaming" class="mt-2 opacity-0 hover:opacity-100 transition-opacity">
+                      <div class="flex space-x-2">
+                        <button @click="copyMessage(message.content)" class="text-xs text-gray-500 hover:text-gray-700">
+                          📋 复制
+                        </button>
+                        <button @click="generateImage(message.content)" class="text-xs text-gray-500 hover:text-gray-700">
+                          🖼️ 图片
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Timestamp -->
+                    <div class="text-xs text-gray-400 mt-1">
+                      <span x-text="formatTime(message.timestamp)"></span>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="p-4 border-t border-gray-200 bg-white">
+              <div class="flex items-center gap-2">
+                <textarea
+                  id="chatInput"
+                  x-model="currentMessage"
+                  @keydown.enter="sendMessage($event)"
+                  placeholder="输入你的问题..."
+                  rows="1"
+                  class="flex-1 resize-none border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  :disabled="isLoading"
+                ></textarea>
+                <button
+                  @click="sendMessage()"
+                  :disabled="isLoading || !currentMessage.trim()"
+                  class="bg-gray-600 text-white border-0 rounded-lg w-10 h-10 flex items-center justify-center hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span x-show="!isLoading">→</span>
+                  <span x-show="isLoading">⏳</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- JavaScript Modules -->
+    <script type="module" src="./js/app.js"></script>
+
+    <!-- Alpine.js (loaded after our modules) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>
