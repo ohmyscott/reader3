@@ -40,6 +40,9 @@ export function ReaderPage() {
     },
 
     async init() {
+      // Load system settings from server first
+      await this.loadSystemSettings();
+
       // Initialize dark mode using global utility
       this.isDarkMode = window.darkModeUtils.isDarkMode();
 
@@ -858,6 +861,30 @@ export function ReaderPage() {
     },
 
     // Settings methods
+    async loadSystemSettings() {
+      try {
+        // Load system settings from server
+        const [languageConfig, darkModeConfig] = await Promise.allSettled([
+          fetch('/api/config/language').then(res => res.json()).catch(() => ({ language: 'en' })),
+          fetch('/api/config/dark_mode').then(res => res.json()).catch(() => ({ dark_mode: false }))
+        ]);
+
+        const language = languageConfig.status === 'fulfilled' ? languageConfig.value.language : 'en';
+        const darkMode = darkModeConfig.status === 'fulfilled' ? darkModeConfig.value.dark_mode : false;
+
+        // Apply system settings
+        if (language && window.i18n) {
+          await window.i18n.setLanguage(language);
+        }
+
+        if (window.darkModeUtils) {
+          window.darkModeUtils.setDarkMode(darkMode);
+        }
+      } catch (error) {
+        console.error('Failed to load system settings:', error);
+      }
+    },
+
     async loadSettings() {
       try {
         const config = await configAPI.getConfig();

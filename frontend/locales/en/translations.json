@@ -79,6 +79,7 @@
     },
     "settings": {
       "title": "System Settings",
+      "system_settings": "System Settings",
       "model_config": "Model Configuration",
       "api_key": "API Key",
       "api_key_required": "API Key *",
@@ -88,6 +89,12 @@
       "model_name_required": "Model Name *",
       "temperature": "Temperature (optional)",
       "max_tokens": "Max Tokens (optional)",
+      "language": "Language",
+      "dark_mode": "Dark Mode",
+      "languages": {
+        "english": "English",
+        "chinese": "简体中文"
+      },
       "more_config": "More Configuration",
       "less_config": "Less Configuration",
       "config_hint": "(Temperature & Max Tokens)",

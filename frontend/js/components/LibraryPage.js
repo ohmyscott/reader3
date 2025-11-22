@@ -20,7 +20,9 @@ export function LibraryPage() {
       base_url: 'https://api.openai.com/v1',
       model_name: 'gpt-4o-mini',
       temperature: 0.7,
-      max_tokens: 32000
+      max_tokens: 32000,
+      language: 'en',
+      dark_mode: false
     },
     savingSettings: false,
     showAdvancedSettings: false,
@@ -224,7 +226,19 @@ export function LibraryPage() {
     },
 
     toggleDarkMode() {
-      this.isDarkMode = window.darkModeUtils.toggle();
+      const newDarkMode = !this.settingsForm.dark_mode;
+      this.settingsForm.dark_mode = newDarkMode;
+      this.isDarkMode = newDarkMode;
+      // Apply dark mode to global utility
+      window.darkModeUtils.setDarkMode(newDarkMode);
+    },
+
+    // Handle dark mode change from checkbox
+    handleDarkModeChange(isEnabled) {
+      this.settingsForm.dark_mode = isEnabled;
+      this.isDarkMode = isEnabled;
+      // Apply dark mode to global utility
+      window.darkModeUtils.setDarkMode(isEnabled);
     },
 
     getStatusColor(type) {
@@ -249,6 +263,14 @@ export function LibraryPage() {
     async loadSettingsAndCheckStatus() {
       try {
         const config = await configAPI.getConfig();
+        // Load system settings from separate endpoints
+        const [languageConfig, darkModeConfig] = await Promise.allSettled([
+          fetch('/api/config/language').then(res => res.json()).catch(() => ({ language: 'en' })),
+          fetch('/api/config/dark_mode').then(res => res.json()).catch(() => ({ dark_mode: window.darkModeUtils.isDarkMode() }))
+        ]);
+
+        const language = languageConfig.status === 'fulfilled' ? languageConfig.value.language : 'en';
+        const darkMode = darkModeConfig.status === 'fulfilled' ? darkModeConfig.value.dark_mode : window.darkModeUtils.isDarkMode();
 
         // Load settings into form, but keep masked API key if present
         this.settingsForm = {
@@ -256,7 +278,9 @@ export function LibraryPage() {
           base_url: config.base_url || 'https://api.openai.com/v1',
           model_name: config.model_name || 'gpt-4o-mini',
           temperature: config.temperature || 0.7,
-          max_tokens: config.max_tokens || 32000
+          max_tokens: config.max_tokens || 32000,
+          language: language,
+          dark_mode: darkMode
         };
 
         // Check if API key is properly configured
@@ -284,14 +308,26 @@ export function LibraryPage() {
 
     async loadSettings() {
       try {
+        // Load model settings from API
         const config = await configAPI.getConfig();
+        // Load system settings from separate endpoints
+        const [languageConfig, darkModeConfig] = await Promise.allSettled([
+          fetch('/api/config/language').then(res => res.json()).catch(() => ({ language: 'en' })),
+          fetch('/api/config/dark_mode').then(res => res.json()).catch(() => ({ dark_mode: false }))
+        ]);
+
+        const language = languageConfig.status === 'fulfilled' ? languageConfig.value.language : 'en';
+        const darkMode = darkModeConfig.status === 'fulfilled' ? darkModeConfig.value.dark_mode : window.darkModeUtils.isDarkMode();
+
         // Load settings into form, but keep masked API key if present
         this.settingsForm = {
           api_key: config.api_key && !config.api_key.startsWith('******') ? config.api_key : '',
           base_url: config.base_url || 'https://api.openai.com/v1',
           model_name: config.model_name || 'gpt-4o-mini',
           temperature: config.temperature || 0.7,
-          max_tokens: config.max_tokens || 32000
+          max_tokens: config.max_tokens || 32000,
+          language: language,
+          dark_mode: darkMode
         };
       } catch (error) {
         console.error('Failed to load settings:', error);
@@ -340,13 +376,52 @@ export function LibraryPage() {
     async saveSettings() {
       this.savingSettings = true;
       try {
-        await configAPI.updateConfig(this.settingsForm);
+        // Save model settings
+        const modelSettings = {
+          api_key: this.settingsForm.api_key,
+          base_url: this.settingsForm.base_url,
+          model_name: this.settingsForm.model_name,
+          temperature: this.settingsForm.temperature,
+          max_tokens: this.settingsForm.max_tokens
+        };
+        await configAPI.updateConfig(modelSettings);
+
+        // Save system settings
+        await Promise.all([
+          fetch('/api/config/language', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ language: this.settingsForm.language })
+          }),
+          fetch('/api/config/dark_mode', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dark_mode: this.settingsForm.dark_mode })
+          })
+        ]);
+
         window.app.showToast(window.i18n.t('library.settings.save_success'), 'success');
         this.closeSettingsModal();
       } catch (error) {
         window.app.showToast(error.message || window.i18n.t('library.settings.save_error'), 'error');
       } finally {
         this.savingSettings = false;
+      }
+    },
+
+    // Handle language change
+    async handleLanguageChange(language) {
+      try {
+        // Update i18n immediately for better UX
+        await window.i18n.setLanguage(language);
+
+        // Also update the form value
+        this.settingsForm.language = language;
+      } catch (error) {
+        console.error('Failed to change language:', error);
+        if (window.app && window.app.showToast) {
+          window.app.showToast('Failed to change language', 'error');
+        }
       }
     },
 

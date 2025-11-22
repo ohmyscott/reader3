@@ -8,6 +8,17 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        // Suppress production warning
+        if (typeof window !== 'undefined' && typeof console !== 'undefined') {
+            const originalWarn = console.warn;
+            console.warn = function(...args) {
+                if (args[0] && args[0].includes && args[0].includes('should not be used in production')) {
+                    return; // Suppress Tailwind CDN production warning
+                }
+                originalWarn.apply(console, args);
+            };
+        }
+
         tailwind.config = {
             content: [
                 "./frontend/**/*.{html,js}",
@@ -53,96 +64,6 @@
                 <div class="flex justify-between items-center">
                     <h1 class="text-3xl font-bold text-white" data-i18n="common.header.title">📚 My Library</h1>
                     <div class="flex items-center gap-3">
-                        <!-- Language Selector -->
-                        <div class="relative" x-data="{
-                            languageOpen: false,
-                            currentDisplay: 'English',
-                            async init() {
-                                // Load saved language from server on initialization
-                                try {
-                                    const response = await fetch('/api/config/language');
-                                    const data = await response.json();
-                                    const savedLang = data.language || 'en';
-                                    this.currentDisplay = savedLang === 'zh-CN' ? '简体中文' : 'English';
-
-                                    // Set language in i18n if available
-                                    if (window.i18n) {
-                                        await window.i18n.setLanguage(savedLang);
-                                    }
-                                } catch (error) {
-                                    console.log('Failed to load language config, using default');
-                                }
-
-                                // Listen for language changes from other components
-                                window.addEventListener('i18n:languageChanged', (e) => {
-                                    this.currentDisplay = e.detail.langInfo.nativeName || 'English';
-                                });
-                            },
-                            async setLanguage(langCode, displayName) {
-                                this.currentDisplay = displayName;
-                                this.languageOpen = false;
-
-                                // Save to TinyDB first
-                                try {
-                                    await fetch('/api/config/language', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ language: langCode })
-                                    });
-                                } catch (error) {
-                                    console.error('Failed to save language config:', error);
-                                }
-
-                                // Then set language in i18n
-                                if (window.i18n) {
-                                    await window.i18n.setLanguage(langCode);
-                                }
-                            }
-                        }" x-init="init()">
-                            <button
-                                @click="languageOpen = !languageOpen"
-                                @click.away="languageOpen = false"
-                                class="btn bg-gray-600 hover:bg-gray-700 text-white shadow-md hover:shadow-lg flex items-center gap-2"
-                                data-i18n-title="common.header.language"
-                                title="Language"
-                            >
-                                <span>🌐</span>
-                                <span class="hidden sm:inline" x-text="currentDisplay">English</span>
-                                <svg class="w-4 h-4 transition-transform" :class="languageOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                </svg>
-                            </button>
-
-                            <!-- Language Dropdown -->
-                            <div
-                                x-show="languageOpen"
-                                x-transition:enter="transition ease-out duration-200"
-                                x-transition:enter-start="opacity-0 transform scale-95"
-                                x-transition:enter-end="opacity-100 transform scale-100"
-                                x-transition:leave="transition ease-in duration-150"
-                                x-transition:leave-start="opacity-100 transform scale-100"
-                                x-transition:leave-end="opacity-0 transform scale-95"
-                                class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-50"
-                            >
-                                <!-- English Option -->
-                                <button
-                                    @click="setLanguage('en', 'English')"
-                                    class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 first:rounded-t-lg"
-                                    :class="currentDisplay === 'English' ? 'bg-gray-100 dark:bg-gray-700 text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-700 dark:text-gray-300'"
-                                >
-                                    <span>🇺🇸 English</span>
-                                </button>
-                                <!-- Chinese Option -->
-                                <button
-                                    @click="setLanguage('zh-CN', '简体中文')"
-                                    class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 last:rounded-b-lg"
-                                    :class="currentDisplay === '简体中文' ? 'bg-gray-100 dark:bg-gray-700 text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-700 dark:text-gray-300'"
-                                >
-                                    <span>🇨🇳 简体中文</span>
-                                </button>
-                            </div>
-                        </div>
-
                         <!-- Settings Button -->
                         <button
                             @click="toggleSettings()"
@@ -153,19 +74,7 @@
                             <span>⚙️</span>
                             <span class="hidden sm:inline" data-i18n="common.header.settings">Settings</span>
                         </button>
-                        <!-- Dark Mode Toggle -->
-                        <button
-                            @click="toggleDarkMode()"
-                            class="btn bg-gray-600 hover:bg-gray-700 text-white shadow-md hover:shadow-lg"
-                            :data-i18n-title="isDarkMode ? 'dark.switch_to_light' : 'dark.switch_to_dark'"
-                            :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
-                        >
-                            <span x-show="!isDarkMode">🌙</span>
-                            <span x-show="isDarkMode">☀️</span>
-                            <span class="hidden sm:inline" x-show="!isDarkMode" data-i18n="common.header.dark_mode">Dark</span>
-                            <span class="hidden sm:inline" x-show="isDarkMode" data-i18n="common.header.light_mode">Light</span>
-                        </button>
-                        <button
+                          <button
                             @click="openUploadModal()"
                             class="btn bg-gray-600 hover:bg-gray-700 text-white shadow-md hover:shadow-lg"
                         >
@@ -354,8 +263,87 @@
 
                 <!-- Modal Body -->
                 <div class="p-6">
-                    <!-- Model Settings Section -->
+                    <!-- System Settings Section -->
                     <div>
+                        <!-- Section Title -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2" data-i18n="library.settings.system_settings">System Settings</h3>
+                            <div class="border-t border-gray-200 dark:border-gray-600"></div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <!-- Language Setting -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <span data-i18n="library.settings.language">Language</span>
+                                </label>
+                                <div class="flex flex-wrap gap-3">
+                                    <label class="flex items-center cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="language"
+                                            value="en"
+                                            x-model="settingsForm.language"
+                                            @change="handleLanguageChange('en')"
+                                            class="sr-only"
+                                        />
+                                        <div class="relative">
+                                            <div class="flex items-center px-4 py-2 border-2 rounded-lg cursor-pointer transition-all duration-200"
+                                                :class="settingsForm.language === 'en'
+                                                    ? 'bg-gray-600 text-white border-gray-600'
+                                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'">
+                                                <span class="text-sm font-medium" data-i18n="library.settings.languages.english">English</span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="language"
+                                            value="zh-CN"
+                                            x-model="settingsForm.language"
+                                            @change="handleLanguageChange('zh-CN')"
+                                            class="sr-only"
+                                        />
+                                        <div class="relative">
+                                            <div class="flex items-center px-4 py-2 border-2 rounded-lg cursor-pointer transition-all duration-200"
+                                                :class="settingsForm.language === 'zh-CN'
+                                                    ? 'bg-gray-600 text-white border-gray-600'
+                                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'">
+                                                <span class="text-sm font-medium" data-i18n="library.settings.languages.chinese">简体中文</span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Dark Mode Setting -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <span data-i18n="library.settings.dark_mode">Dark Mode</span>
+                                </label>
+                                <div class="flex items-center gap-4">
+                                    <label class="relative">
+                                        <input
+                                            type="checkbox"
+                                            x-model="settingsForm.dark_mode"
+                                            @change="handleDarkModeChange($event.target.checked)"
+                                            class="sr-only peer"
+                                        />
+                                        <div class="h-8 w-14 flex items-center bg-gray-300 dark:bg-gray-600 rounded-full transition-colors duration-200 relative cursor-pointer peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-500 peer-focus:ring-offset-2">
+                                            <div class="h-6 w-6 bg-white rounded-full shadow-md transform transition-all duration-200"
+                                                 :class="settingsForm.dark_mode ? 'translate-x-6' : 'translate-x-1'"></div>
+                                        </div>
+                                    </label>
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                                          x-text="settingsForm.dark_mode ? 'ON' : 'OFF'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Model Settings Section -->
+                    <div class="mt-8">
                         <!-- Section Title -->
                         <div class="mb-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2" data-i18n="library.settings.model_config"></h3>
@@ -417,7 +405,7 @@
                                     <a
                                         href="javascript:void(0)"
                                         @click="showAdvancedSettings = !showAdvancedSettings"
-                                        class="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 text-decoration-none"
+                                        class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors duration-200 text-decoration-none"
                                     >
                                         <svg
                                             class="w-4 h-4 transition-transform duration-200"
@@ -490,7 +478,7 @@
                                 <button
                                     type="submit"
                                     :disabled="savingSettings"
-                                    class="btn bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 flex-1 sm:flex-none"
+                                    class="btn bg-gray-600 hover:bg-gray-700 text-white disabled:opacity-50 flex-1 sm:flex-none"
                                 >
                                     <span x-show="!savingSettings" data-i18n="common.actions.save">Save</span>
                                     <span x-show="savingSettings" data-i18n="library.settings.saving">Saving...</span>

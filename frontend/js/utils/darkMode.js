@@ -4,8 +4,24 @@
 window.darkModeUtils = {
   // Initialize dark mode from localStorage
   init() {
-    const isDark = this.isDarkMode();
-    this.applyDarkMode(isDark);
+    // Wait for DOM to be ready
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    // Apply dark mode immediately if DOM is ready, otherwise wait for DOMContentLoaded
+    const applyMode = () => {
+      const isDark = this.isDarkMode();
+      this.applyDarkMode(isDark);
+      return isDark;
+    };
+
+    // Apply immediately if DOM is ready, otherwise wait
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', applyMode);
+    } else {
+      applyMode();
+    }
 
     // Listen for storage changes from other tabs/windows
     window.addEventListener('storage', (e) => {
@@ -19,7 +35,7 @@ window.darkModeUtils = {
       }
     });
 
-    return isDark;
+    return this.isDarkMode();
   },
 
   // Check current dark mode state
@@ -47,14 +63,37 @@ window.darkModeUtils = {
 
   // Apply dark mode classes to DOM
   applyDarkMode(isDark) {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      document.body.classList.add('bg-slate-900', 'text-gray-100');
-      document.body.classList.remove('bg-slate-50', 'text-gray-900');
+    // Wait for DOM to be ready
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const apply = () => {
+      try {
+        if (!document.documentElement || !document.body) {
+          return;
+        }
+
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+          document.body.classList.add('bg-slate-900', 'text-gray-100');
+          document.body.classList.remove('bg-slate-50', 'text-gray-900');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.body.classList.remove('bg-slate-900', 'text-gray-100');
+          document.body.classList.add('bg-slate-50', 'text-gray-900');
+        }
+      } catch (error) {
+        console.error('Error applying dark mode:', error);
+      }
+    };
+
+    // Apply immediately if DOM is ready, otherwise wait
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', apply);
     } else {
-      document.documentElement.classList.remove('dark');
-      document.body.classList.remove('bg-slate-900', 'text-gray-100');
-      document.body.classList.add('bg-slate-50', 'text-gray-900');
+      // Use setTimeout to ensure DOM is fully processed
+      setTimeout(apply, 0);
     }
   },
 
@@ -66,5 +105,17 @@ window.darkModeUtils = {
 
 // Auto-initialize when script loads
 if (typeof window !== 'undefined') {
-  window.darkModeUtils.init();
+  // Always wait for DOM to be ready before initializing
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        window.darkModeUtils.init();
+      }, 10); // Small delay to ensure all scripts are loaded
+    });
+  } else {
+    // DOM is already loaded, but wait a bit to ensure initialization order
+    setTimeout(() => {
+      window.darkModeUtils.init();
+    }, 10);
+  }
 }

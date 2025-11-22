@@ -189,6 +189,43 @@ class ConfigManager:
         except Exception:
             return None
 
+    def save_dark_mode_config(self, dark_mode: bool) -> bool:
+        """Save dark mode configuration to database.
+
+        Args:
+            dark_mode: Dark mode state (True for enabled, False for disabled)
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Remove any existing dark mode config
+            self.config_table.remove(Query().type == "dark_mode")
+
+            # Save new dark mode config
+            self.config_table.insert({
+                "type": "dark_mode",
+                "dark_mode": dark_mode
+            })
+            return True
+        except Exception as e:
+            logger.error(f"Error saving dark mode config: {e}")
+            return False
+
+    def get_dark_mode_config(self) -> Optional[bool]:
+        """Get dark mode configuration from database.
+
+        Returns:
+            Dark mode state if found, None otherwise
+        """
+        try:
+            result = self.config_table.get(Query().type == "dark_mode")
+            if result and "dark_mode" in result:
+                return result["dark_mode"]
+            return None
+        except Exception:
+            return None
+
     def export_config(self) -> Dict[str, Any]:
         """Export all configuration as dictionary.
 

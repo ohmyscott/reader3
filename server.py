@@ -469,6 +469,10 @@ class LanguageRequest(BaseModel):
     """Request model for language configuration updates."""
     language: str
 
+class DarkModeRequest(BaseModel):
+    """Request model for dark mode configuration updates."""
+    dark_mode: bool
+
 
 @app.get("/api/config")
 async def get_config():
@@ -625,6 +629,49 @@ async def get_language_config():
         return JSONResponse(
             status_code=500,
             content={"error": "Failed to get language configuration"}
+        )
+
+@app.post("/api/config/dark_mode")
+async def update_dark_mode_config(dark_mode_request: DarkModeRequest):
+    """Update dark mode configuration and persist to TinyDB."""
+    try:
+        config_manager = get_config_manager()
+        success = config_manager.save_dark_mode_config(dark_mode_request.dark_mode)
+
+        if success:
+            logger.info(f"Dark mode configuration updated to: {dark_mode_request.dark_mode}")
+            return JSONResponse(content={
+                "dark_mode": dark_mode_request.dark_mode
+            })
+        else:
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Failed to update dark mode configuration"}
+            )
+
+    except Exception as e:
+        logger.error(f"Error updating dark mode config: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Failed to update dark mode configuration"}
+        )
+
+@app.get("/api/config/dark_mode")
+async def get_dark_mode_config():
+    """Get current dark mode configuration."""
+    try:
+        config_manager = get_config_manager()
+        dark_mode = config_manager.get_dark_mode_config()
+
+        return JSONResponse(content={
+            "dark_mode": dark_mode if dark_mode is not None else False  # Default to False if not set
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting dark mode config: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Failed to get dark mode configuration"}
         )
 
 @app.post("/api/upload-book")

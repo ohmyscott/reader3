@@ -79,6 +79,7 @@
     },
     "settings": {
       "title": "系统设置",
+      "system_settings": "系统设置",
       "model_config": "模型配置",
       "api_key": "API 密钥",
       "api_key_required": "API 密钥 *",
@@ -88,6 +89,12 @@
       "model_name_required": "模型名称 *",
       "temperature": "Temperature (可选)",
       "max_tokens": "Max Tokens (可选)",
+      "language": "语言",
+      "dark_mode": "深色模式",
+      "languages": {
+        "english": "English",
+        "chinese": "简体中文"
+      },
       "more_config": "更多配置",
       "less_config": "更少配置",
       "config_hint": "(Temperature & Max Tokens)",

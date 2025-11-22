@@ -8,6 +8,17 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        // Suppress production warning
+        if (typeof window !== 'undefined' && typeof console !== 'undefined') {
+            const originalWarn = console.warn;
+            console.warn = function(...args) {
+                if (args[0] && args[0].includes && args[0].includes('should not be used in production')) {
+                    return; // Suppress Tailwind CDN production warning
+                }
+                originalWarn.apply(console, args);
+            };
+        }
+
         tailwind.config = {
             content: [
                 "./frontend/**/*.{html,js}",
@@ -366,7 +377,7 @@
                         data-i18n-placeholder="chat.type_message"
                         placeholder="输入你的问题..."
                         rows="1"
-                        class="flex-1 resize-none border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        class="flex-1 resize-none border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         :disabled="isLoading"
                     ></textarea>
                     <button
