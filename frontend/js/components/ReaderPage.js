@@ -16,6 +16,7 @@ export function ReaderPage() {
     error: null,
     readingProgress: 0,
     showToc: false,
+    isDarkMode: false,
 
     // Chat state
     chatOpen: false,
@@ -39,6 +40,14 @@ export function ReaderPage() {
     },
 
     async init() {
+      // Initialize dark mode using global utility
+      this.isDarkMode = window.darkModeUtils.isDarkMode();
+
+      // Listen for dark mode changes from other tabs
+      window.addEventListener('darkModeChanged', (e) => {
+        this.isDarkMode = e.detail.isDarkMode;
+      });
+
       // Get bookId and chapterIndex from the current page URL
       const pathParts = window.location.pathname.split('/');
       if (pathParts.length >= 4 && pathParts[1] === 'read') {
@@ -445,14 +454,153 @@ export function ReaderPage() {
     // Generate image from message content using new approach
     async generateImage(content) {
       try {
-        const htmlContent = marked.parse(content);
-        this.showImageDialog(htmlContent);
+        // Check if it's mobile device
+        const isMobile = window.innerWidth <= 768;
+
+        if (isMobile) {
+          // Mobile: Direct copy to clipboard without preview
+          await this.copyContentAsImage(content);
+        } else {
+          // Desktop: Show preview dialog
+          const htmlContent = marked.parse(content);
+          this.showImageDialog(htmlContent);
+        }
       } catch (error) {
         console.error('Failed to generate image:', error);
         if (window.app && window.app.showToast) {
           window.app.showToast('Failed to generate image', 'error');
         }
       }
+    },
+
+    // Copy content as image directly to clipboard (for mobile)
+    async copyContentAsImage(content) {
+      try {
+        // Show loading toast
+        if (window.app && window.app.showToast) {
+          window.app.showToast('正在生成图片...', 'info');
+        }
+
+        // Create the same preview dialog structure as PC but hide it
+        const htmlContent = marked.parse(content);
+        console.log('Creating image dialog structure with content:', htmlContent.substring(0, 100));
+
+        const modalOverlay = this.createImageDialogStructure(htmlContent);
+
+        // Add to DOM and make it visible for image generation
+        modalOverlay.style.visibility = 'hidden'; // Use visibility instead of display
+        document.body.appendChild(modalOverlay);
+
+        // Verify the imagePreview element exists
+        const imagePreviewElement = document.getElementById('imagePreview');
+        console.log('ImagePreview element found:', !!imagePreviewElement);
+
+        if (!imagePreviewElement) {
+          throw new Error('Failed to create imagePreview element');
+        }
+
+        try {
+          // Make the element temporarily visible for htmlToImage to work
+          modalOverlay.style.visibility = 'visible';
+          modalOverlay.style.opacity = '0';
+          modalOverlay.style.zIndex = '-1';
+
+          // Small delay to ensure the element is rendered
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          // Copy using the same logic as PC
+          await this.copyImageToClipboard('imagePreview');
+
+          // Show success toast
+          if (window.app && window.app.showToast) {
+            window.app.showToast('图片已复制到剪贴板', 'success');
+          }
+        } finally {
+          // Clean up - remove the hidden dialog
+          if (document.body.contains(modalOverlay)) {
+            document.body.removeChild(modalOverlay);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to copy image:', error);
+        if (window.app && window.app.showToast) {
+          window.app.showToast('复制失败，请重试', 'error');
+        }
+      }
+    },
+
+    // Create image dialog structure (extracted from showImageDialog)
+    createImageDialogStructure(htmlContent) {
+      // Create modal overlay
+      const modalOverlay = document.createElement('div');
+      modalOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        backdrop-filter: blur(5px);
+      `;
+
+      // Check dark mode for styling
+      const isDarkMode = document.documentElement.classList.contains('dark');
+
+      // Create modal content
+      const modalContent = document.createElement('div');
+      modalContent.style.cssText = `
+        background: ${isDarkMode ? '#1f2937' : 'white'};
+        border-radius: 16px;
+        width: 800px;
+        max-width: 90vw;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        overflow: hidden;
+      `;
+
+      modalContent.innerHTML = `
+        <div style="padding: 16px 24px; border-bottom: 1px solid ${isDarkMode ? '#374151' : '#eee'}; display: flex; justify-content: space-between; align-items: center; background: ${isDarkMode ? '#1f2937' : '#fff'};">
+            <h3 style="margin: 0; font-size: 18px; color: ${isDarkMode ? '#f9fafb' : '#333'}; font-weight: 600;">📸 图片预览</h3>
+            <div style="display: flex; gap: 10px;">
+                <button id="copyImgBtn" style="display: flex; align-items: center; gap: 6px; background: ${isDarkMode ? '#374151' : '#fff'}; color: ${isDarkMode ? '#f9fafb' : '#333'}; border: 1px solid ${isDarkMode ? '#4b5563' : '#ddd'}; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s;">
+                    <span>📋</span> 复制图片
+                </button>
+                <button id="downloadBtn" style="display: flex; align-items: center; gap: 6px; background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s;">
+                    <span>📥</span> 下载图片
+                </button>
+                <button id="closeModalBtn" style="background: transparent; color: ${isDarkMode ? '#9ca3af' : '#999'}; border: none; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 20px; line-height: 1;">
+                    ✕
+                </button>
+            </div>
+        </div>
+        <div style="flex: 1; padding: 30px; overflow-y: auto; background: ${isDarkMode ? '#111827' : '#f8f9fa'}; display: flex; justify-content: center;">
+            <div id="imagePreview" class="message-bubble" style="
+                background: ${isDarkMode ? '#1f2937' : 'white'};
+                padding: 40px;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, ${isDarkMode ? '0.4' : '0.08'});
+                width: 100%;
+                max-width: 100%;
+                color: ${isDarkMode ? '#f3f4f6' : '#333'};
+                list-style-position: inside;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            ">
+                ${htmlContent}
+            </div>
+        </div>
+      `;
+
+      modalOverlay.appendChild(modalContent);
+      return modalOverlay;
     },
 
     // Show image generation dialog (based on operation manual)
@@ -585,9 +733,10 @@ export function ReaderPage() {
 
     // Image generation options (based on operation manual)
     get imageOptions() {
+      const isDarkMode = document.documentElement.classList.contains('dark');
       return {
         quality: 1.0,
-        backgroundColor: '#ffffff',
+        backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
         pixelRatio: 2,
         style: {
           fontFamily: '"Georgia", "Microsoft YaHei", sans-serif'
@@ -598,11 +747,22 @@ export function ReaderPage() {
     // Copy image to clipboard using html-to-image
     async copyImageToClipboard(elementId) {
       const node = document.getElementById(elementId);
-      if (!node) return;
+      if (!node) {
+        console.error('Element not found:', elementId);
+        throw new Error(`Element with id "${elementId}" not found`);
+      }
 
       try {
         // Generate blob using htmlToImage
         const blob = await window.htmlToImage.toBlob(node, this.imageOptions);
+
+        // Check if blob was generated successfully
+        if (!blob) {
+          console.error('Failed to generate blob from element:', node);
+          throw new Error('Failed to generate image blob');
+        }
+
+        console.log('Blob generated successfully:', blob.type, blob.size);
 
         // Write to clipboard
         if (navigator.clipboard && navigator.clipboard.write) {
@@ -611,6 +771,7 @@ export function ReaderPage() {
               [blob.type]: blob
             })
           ]);
+          console.log('Image copied to clipboard successfully');
         } else {
           throw new Error('Clipboard API not supported');
         }

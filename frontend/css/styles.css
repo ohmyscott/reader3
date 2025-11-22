@@ -179,6 +179,11 @@ body.bg-gray-900 {
   min-height: 0;
 }
 
+.dark .sidebar {
+  background-color: #1f2937;
+  border-right-color: #374151;
+}
+
 .main-content {
   flex: 1;
   overflow-y: auto;
@@ -188,6 +193,10 @@ body.bg-gray-900 {
   min-height: 0;
 }
 
+.dark .main-content {
+  background-color: #111827;
+}
+
 .content-wrapper {
   max-width: 42rem; /* 672px, good reading width */
   margin: 0 auto;
@@ -195,6 +204,10 @@ body.bg-gray-900 {
   font-size: 1.125rem;
   line-height: 1.8;
   color: #111827;
+}
+
+.dark .content-wrapper {
+  color: #f3f4f6;
 }
 
 .book-content h1,
@@ -208,6 +221,15 @@ body.bg-gray-900 {
   color: #111827;
   margin-top: 2rem;
   margin-bottom: 1rem;
+}
+
+.dark .book-content h1,
+.dark .book-content h2,
+.dark .book-content h3,
+.dark .book-content h4,
+.dark .book-content h5,
+.dark .book-content h6 {
+  color: #f9fafb;
 }
 
 .book-content h1 {
@@ -227,6 +249,11 @@ body.bg-gray-900 {
   text-align: justify;
   text-indent: 2em;
   line-height: 1.8;
+  color: #1f2937;
+}
+
+.dark .book-content p {
+  color: #e5e7eb;
 }
 
 .book-content img {
@@ -238,10 +265,20 @@ body.bg-gray-900 {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
+.dark .book-content img {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+}
+
 .book-content ul,
 .book-content ol {
   margin-bottom: 1.5rem;
   padding-left: 2rem;
+  color: #1f2937;
+}
+
+.dark .book-content ul,
+.dark .book-content ol {
+  color: #e5e7eb;
 }
 
 .book-content li {
@@ -261,14 +298,28 @@ body.bg-gray-900 {
   border-radius: 0 0.5rem 0.5rem 0;
 }
 
+.dark .book-content blockquote {
+  border-left-color: #9ca3af;
+  color: #d1d5db;
+  background-color: #374151;
+}
+
 .book-content a {
   color: #6b7280;
   text-decoration: underline;
   transition: color 0.2s;
 }
 
+.dark .book-content a {
+  color: #9ca3af;
+}
+
 .book-content a:hover {
   color: #111827;
+}
+
+.dark .book-content a:hover {
+  color: #f3f4f6;
 }
 
 /* Chat Styles */
@@ -379,12 +430,47 @@ body.bg-gray-900 {
   padding: 1rem;
 }
 
+.dark .chat-input-area {
+  background: #374151;
+  border-top-color: #4b5563;
+}
+
+/* Fix chat input styling issues */
+.chat-input-area textarea {
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+}
+
+.chat-input-area textarea:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5) !important;
+  -webkit-box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5) !important;
+  -moz-box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5) !important;
+}
+
 /* Chat shortcuts area */
 .chat-shortcuts {
   background: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
   padding: 0.75rem;
   flex-shrink: 0;
+}
+
+.dark .chat-shortcuts {
+  background: #374151;
+  border-bottom-color: #4b5563;
+}
+
+.dark .chat-shortcuts button {
+  color: #d1d5db !important;
+  background: transparent !important;
+  border-color: #4b5563 !important;
+}
+
+.dark .chat-shortcuts button:hover {
+  color: #f9fafb !important;
+  background: #4b5563 !important;
+  border-color: #6b7280 !important;
 }
 
 /* Table of Contents Styles */
@@ -400,11 +486,21 @@ body.bg-gray-900 {
   font-weight: 400;
 }
 
+.dark .toc-link {
+  color: #d1d5db;
+}
+
 .toc-link:hover {
   background-color: #f3f4f6;
   color: #1f2937;
   border-left-color: #d1d5db;
   transform: translateX(2px);
+}
+
+.dark .toc-link:hover {
+  background-color: #374151;
+  color: #f9fafb;
+  border-left-color: #6b7280;
 }
 
 .toc-link.active {
@@ -413,6 +509,13 @@ body.bg-gray-900 {
   border-left-color: #4b5563;
   font-weight: 600;
   box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.dark .toc-link.active {
+  background-color: #4b5563;
+  color: #f9fafb;
+  border-left-color: #9ca3af;
+  box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 }
 
 .toc-sub-link {
@@ -428,6 +531,10 @@ body.bg-gray-900 {
   position: relative;
 }
 
+.dark .toc-sub-link {
+  color: #9ca3af;
+}
+
 .toc-sub-link:hover {
   background-color: #f9fafb;
   color: #4b5563;
@@ -435,11 +542,23 @@ body.bg-gray-900 {
   transform: translateX(1px);
 }
 
+.dark .toc-sub-link:hover {
+  background-color: #374151;
+  color: #d1d5db;
+  border-left-color: #6b7280;
+}
+
 .toc-sub-link.active {
   background-color: #f3f4f6;
   color: #1f2937;
   border-left-color: #4b5563;
   font-weight: 500;
+}
+
+.dark .toc-sub-link.active {
+  background-color: #4b5563;
+  color: #f9fafb;
+  border-left-color: #9ca3af;
 }
 
 .toc-section {
@@ -908,10 +1027,18 @@ body.bg-gray-900 {
     text-indent: 1.5em;
   }
 
+  .chat-btn {
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.25rem;
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+
   .chat-dialog {
     width: calc(100vw - 2rem);
     right: 1rem;
-    bottom: 5rem;
+    bottom: 4rem;
     height: calc(100vh - 8rem);
   }
 }
@@ -927,9 +1054,18 @@ body.bg-gray-900 {
     text-indent: 1em;
   }
 
+  .chat-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.125rem;
+    bottom: 1.25rem;
+    right: 1.25rem;
+  }
+
   .chat-dialog {
     width: calc(100vw - 1rem);
     right: 0.5rem;
+    bottom: 3.75rem;
   }
 
   .settings-dialog {
@@ -975,5 +1111,79 @@ body.bg-gray-900 {
 /* Dark mode for settings dialog header */
 .dark .settings-dialog-header {
   background: linear-gradient(to right, #374151, #1f2937) !important;
+}
+
+/* Additional dark mode improvements for reader */
+.book-title-header {
+  color: inherit; /* Ensure proper color inheritance */
+}
+
+.dark .book-title-header {
+  border-bottom-color: #374151;
+}
+
+/* Ensure book title has proper contrast in both modes */
+.book-title-header h1 {
+  color: #111827 !important;
+}
+
+.dark .book-title-header h1 {
+  color: #f9fafb !important;
+}
+
+.book-title-header .text-sm {
+  color: #4b5563 !important;
+}
+
+.dark .book-title-header .text-sm {
+  color: #9ca3af !important;
+}
+
+.dark .chapter-navigation {
+  border-top-color: #374151;
+}
+
+.dark .chapter-navigation a {
+  background-color: #374151;
+  color: #d1d5db;
+  border-color: #4b5563;
+}
+
+.dark .chapter-navigation a:hover:not(:disabled) {
+  background-color: #4b5563;
+  color: #f9fafb;
+}
+
+.dark .chapter-navigation a:disabled {
+  background-color: #1f2937;
+  color: #6b7280;
+  border-color: #374151;
+}
+
+.dark .loading-spinner {
+  border-color: #4b5563;
+  border-top-color: #9ca3af;
+}
+
+.dark .error-state {
+  color: #fca5a5;
+}
+
+.dark .message.assistant .message-bubble {
+  background-color: #374151;
+  color: #f9fafb;
+  border-color: #4b5563;
+}
+
+.dark .message-actions button {
+  background: #374151;
+  border-color: #4b5563;
+  color: #d1d5db;
+}
+
+.dark .message-actions button:hover {
+  background: #4b5563;
+  color: #f9fafb;
+  border-color: #6b7280;
 }
 }

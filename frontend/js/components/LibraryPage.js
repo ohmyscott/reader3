@@ -67,9 +67,8 @@ export function LibraryPage() {
         clearTimeout(loadingTimeout);
       }
 
-      // Load dark mode preference
-      this.isDarkMode = localStorage.getItem('darkMode') === 'true';
-      this.applyDarkMode();
+      // Load dark mode preference using global utility
+      this.isDarkMode = window.darkModeUtils.isDarkMode();
 
       // Load configuration and check if model is configured (combined to avoid duplicate API calls)
       await this.loadSettingsAndCheckStatus();
@@ -225,21 +224,7 @@ export function LibraryPage() {
     },
 
     toggleDarkMode() {
-      this.isDarkMode = !this.isDarkMode;
-      localStorage.setItem('darkMode', this.isDarkMode);
-      this.applyDarkMode();
-    },
-
-    applyDarkMode() {
-      if (this.isDarkMode) {
-        document.documentElement.classList.add('dark');
-        document.body.classList.add('bg-slate-900', 'text-gray-100');
-        document.body.classList.remove('bg-slate-50', 'text-gray-900');
-      } else {
-        document.documentElement.classList.remove('dark');
-        document.body.classList.remove('bg-slate-900', 'text-gray-100');
-        document.body.classList.add('bg-slate-50', 'text-gray-900');
-      }
+      this.isDarkMode = window.darkModeUtils.toggle();
     },
 
     getStatusColor(type) {

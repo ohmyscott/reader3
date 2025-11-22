@@ -167,9 +167,9 @@
             <main class="main-content">
                 <div class="content-wrapper lg:pt-0 pt-12">
                     <!-- Book Title Header -->
-                    <header class="text-center mb-12 pb-8 border-b border-gray-200 dark:border-gray-600">
-                        <h1 class="text-3xl font-bold text-gray-900 mb-2 leading-tight" x-text="book?.metadata?.title || ''"></h1>
-                        <div class="text-sm text-gray-600 space-x-4">
+                    <header class="book-title-header text-center mb-12 pb-8 border-b border-gray-200 dark:border-gray-600">
+                        <h1 class="text-3xl font-bold mb-2 leading-tight text-gray-900 dark:text-gray-100" x-text="book?.metadata?.title || ''"></h1>
+                        <div class="text-sm text-gray-600 space-x-4 dark:text-gray-400">
                             <template x-if="book?.metadata?.authors">
                                 <span>✍️</span>
                                 <span x-text="book.metadata.authors.join(', ')"></span>
@@ -197,7 +197,7 @@
                         <div x-html="chapter?.content || 'Loading chapter content...'"></div>
 
                         <!-- Chapter Navigation -->
-                        <nav class="flex justify-between items-center mt-8 pt-8 border-t border-gray-200">
+                        <nav class="chapter-navigation flex justify-between items-center mt-8 pt-8 border-t border-gray-200">
                             <a
                                 :href="chapterIndex > 0 ? `/read/${encodeURIComponent(bookId)}/${chapterIndex - 1}` : '#'"
                                 :class="chapterIndex <= 0 ? 'btn bg-gray-200 text-gray-400 cursor-not-allowed' : 'btn bg-gray-200 hover:bg-gray-300 text-gray-700'"
@@ -357,7 +357,7 @@
             </div>
 
             <!-- Chat Input -->
-            <div class="p-4 border-t border-gray-200 bg-white">
+            <div class="p-4 border-t border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-600">
                 <div class="flex items-center gap-2">
                     <textarea
                         id="chatInput"
@@ -366,13 +366,13 @@
                         data-i18n-placeholder="chat.type_message"
                         placeholder="输入你的问题..."
                         rows="1"
-                        class="flex-1 resize-none border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                        class="flex-1 resize-none border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         :disabled="isLoading"
                     ></textarea>
                     <button
                         @click="sendMessage()"
                         :disabled="isLoading || !currentMessage.trim()"
-                        class="bg-gray-600 text-white border-0 rounded-lg w-10 h-10 flex items-center justify-center hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="bg-gray-600 text-white border-0 rounded-lg w-10 h-10 flex items-center justify-center hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600"
                     >
                         <span x-show="!isLoading">→</span>
                         <span x-show="isLoading">⏳</span>
@@ -383,7 +383,10 @@
 
       </div>
 
-    <!-- i18n Module (must load first) -->
+    <!-- Dark Mode Utility (must load before i18n) -->
+    <script src="/js/utils/darkMode.js"></script>
+
+    <!-- i18n Module -->
     <script src="/locales/index.js"></script>
 
     <!-- JavaScript Modules -->
