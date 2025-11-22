@@ -214,8 +214,9 @@ export function LibraryPage() {
     async checkConfigStatus() {
       try {
         const config = await configAPI.getConfig();
-        // Check if API key is properly configured (not masked)
-        if (!config.api_key || config.api_key.startsWith('******')) {
+        // Check if API key is properly configured
+        // If api_key is masked (starts with "******"), it means it's configured
+        if (!config.api_key || config.api_key.trim() === '') {
           // API key is not configured, show settings modal
           this.showSettingsModal = true;
           window.app.showToast('请先配置AI模型设置', 'error');
