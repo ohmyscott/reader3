@@ -104,3 +104,4 @@ node_modules/
 
 # Development tools
 test_*
+# ops.sh is tracked as it's the main operations script

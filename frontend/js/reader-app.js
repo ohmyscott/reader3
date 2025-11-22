@@ -1,17 +1,16 @@
 // Components
-import { LibraryPage } from './components/LibraryPage.js';
 import { ReaderPage } from './components/ReaderPage.js';
 
-// API
+// API - use absolute imports for MPA
 import { booksAPI } from '/frontend-api/books.js';
 import { chatAPI } from '/frontend-api/chat.js';
 
-// Application utilities
+// Application utilities (re-exported for reader page)
 window.app = {
   // Initialize application
   async init() {
-    console.log('Initializing Reader3 Application...');
-    console.log('Application initialized');
+    console.log('Initializing Reader3 Reader Application...');
+    console.log('Reader application initialized');
   },
 
   // Show toast notification
@@ -57,8 +56,7 @@ document.addEventListener('alpine:init', () => {
   // Register global data and methods
   Alpine.data('app', () => window.app);
 
-  // Register page components
-  Alpine.data('LibraryPage', LibraryPage);
+  // Register reader component
   Alpine.data('ReaderPage', ReaderPage);
 });
 

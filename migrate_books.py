@@ -182,8 +182,8 @@ def main():
         print(f"   Uploads directory: {Path('uploads').absolute()}")
         print(f"\n💡 Next steps:")
         print(f"   1. Review your .env file configuration")
-        print(f"   2. Run './dev-tools.sh ls' to verify the migration")
-        print(f"   3. Start the server with './dev-tools.sh dev start'")
+        print(f"   2. Run './ops.sh ls' to verify the migration")
+        print(f"   3. Start the server with './ops.sh dev start'")
     else:
         print("\nℹ️  No files needed to be migrated.")
 

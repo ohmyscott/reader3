@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  reader3:
+    build: .
+    container_name: reader3
+    ports:
+      - "8123:8123"
+    volumes:
+      # Mount books directory for persistent storage
+      - ./books:/app/books
+      # Mount uploads directory for persistent EPUB file storage
+      - ./uploads:/app/uploads
+      # Mount .env file for configuration
+      - ./.env:/app/.env:ro
+    environment:
+      - BOOKS_DIR=/app/books
+      - UPLOAD_DIR=/app/uploads
+      # Override any other environment variables as needed
+      # - OPENAI_BASE_URL=https://api.openai.com/v1
+      # - OPENAI_API_KEY=your_api_key_here
+      # - OPENAI_MODEL=gpt-4o-mini
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8123/api/books"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - reader3-network
+
+networks:
+  reader3-network:
+    driver: bridge
+
+volumes:
+  reader3-books:
+    driver: local

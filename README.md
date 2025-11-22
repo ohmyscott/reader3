@@ -62,8 +62,8 @@ A lightweight, self-hosted EPUB reader designed for reading books together with 
 3. **启动服务器**
    ```bash
    uv run python server.py
-   # 或使用开发工具
-   ./dev-tools.sh dev start
+   # 或使用运维工具
+   ./ops.sh dev start
    ```
 
 4. **访问应用**
@@ -97,27 +97,27 @@ OPENAI_MAX_TOKENS=2000
 
 ## 🛠️ 开发工具
 
-项目提供了完整的开发工具 `dev-tools.sh`：
+项目提供了完整的运维工具 `ops.sh`：
 
 ```bash
 # 开发环境
-./dev-tools.sh dev start     # 启动开发服务器
-./dev-tools.sh dev stop      # 停止服务器
-./dev-tools.sh dev restart   # 重启服务器
-./dev-tools.sh dev ps        # 查看服务状态
+./ops.sh dev start     # 启动开发服务器
+./ops.sh dev stop      # 停止服务器
+./ops.sh dev restart   # 重启服务器
+./ops.sh dev ps        # 查看服务状态
 
 # 生产环境
-./dev-tools.sh prod start    # 启动Docker容器
-./dev-tools.sh prod stop     # 停止容器
-./dev-tools.sh prod build    # 构建Docker镜像
+./ops.sh prod start    # 启动Docker容器
+./ops.sh prod stop     # 停止容器
+./ops.sh prod build    # 构建Docker镜像
 
 # 文件管理
-./dev-tools.sh ls            # 查看书籍统计信息
-./dev-tools.sh clean lru     # 清理旧文件（保留最新10个）
-./dev-tools.sh clean lru 5   # 保留最新5个文件
+./ops.sh ls            # 查看书籍统计信息
+./ops.sh clean lru     # 清理旧文件（保留最新10个）
+./ops.sh clean lru 5   # 保留最新5个文件
 
 # 帮助
-./dev-tools.sh help          # 显示所有命令
+./ops.sh help          # 显示所有命令
 ```
 
 ## 📁 项目结构
@@ -126,7 +126,7 @@ OPENAI_MAX_TOKENS=2000
 reader3/
 ├── server.py              # 主服务器
 ├── reader3.py             # EPUB处理工具
-├── dev-tools.sh           # 开发运维工具
+├── ops.sh                 # 运维工具
 ├── migrate_books.py       # 数据迁移工具
 ├── test-docker.sh         # Docker测试脚本
 ├── docker-compose.yml     # Docker Compose配置

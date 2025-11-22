@@ -1,116 +1,196 @@
 /* Base Styles */
-@layer base {
-  * {
-    box-sizing: border-box;
-  }
+* {
+  box-sizing: border-box;
+}
 
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.6;
-    color: #111827;
-    background-color: #f9fafb;
-  }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  color: #111827;
+  background-color: #f9fafb;
+}
 
-  /* Dark Mode Styles */
-  body.bg-gray-900 {
-    color: #f9fafb;
-    background-color: #111827;
-  }
+/* Dark Mode Styles */
+body.bg-gray-900 {
+  color: #f9fafb;
+  background-color: #111827;
+}
 
-  .dark .card {
-    background-color: #1f2937;
-    border-color: #374151;
-  }
+.dark .card {
+  background-color: #1f2937;
+  border-color: #374151;
+}
 
-  .dark .modal-overlay {
-    background-color: rgba(0, 0, 0, 0.7);
-  }
+.dark .modal-overlay {
+  background-color: rgba(0, 0, 0, 0.7);
+}
 
-  .dark .modal-content {
-    background-color: #1f2937;
-  }
+.dark .modal-content {
+  background-color: #1f2937;
+}
 
-  .dark .chat-dialog {
-    background-color: #1f2937;
-    border-color: #374151;
-  }
+.dark .chat-dialog {
+  background-color: #1f2937;
+  border-color: #374151;
+}
 
-  .dark .sidebar {
-    background-color: #1f2937;
-    border-color: #374151;
-  }
+.dark .sidebar {
+  background-color: #1f2937;
+  border-color: #374151;
+}
 
-  .dark .main-content {
-    background-color: #111827;
-  }
+.dark .main-content {
+  background-color: #111827;
 }
 
 /* Component Styles */
-@layer components {
-  .btn {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
-  }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
 
-  .btn-primary {
-    @apply btn bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500;
-  }
+.btn:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
 
-  .btn-secondary {
-    @apply btn bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500;
-  }
+.btn-primary {
+  background-color: #4b5563;
+  color: white;
+}
 
-  .btn-success {
-    @apply btn bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
-  }
+.btn-primary:hover {
+  background-color: #374151;
+}
 
-  .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200;
-  }
+.btn-primary:focus {
+  box-shadow: 0 0 0 2px #9ca3af;
+}
 
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-  }
+.btn-secondary {
+  background-color: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
 
-  .modal-content {
-    background-color: white;
-    border-radius: 1rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    max-width: 32rem;
-    width: 100%;
-    margin-left: 1rem;
-    margin-right: 1rem;
-    max-height: 90vh;
-    overflow: hidden;
-  }
+.btn-secondary:hover {
+  background-color: #f9fafb;
+}
+
+.btn-secondary:focus {
+  box-shadow: 0 0 0 2px #9ca3af;
+}
+
+.btn-success {
+  background-color: #059669;
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: #047857;
+}
+
+.btn-success:focus {
+  box-shadow: 0 0 0 2px #6ee7b7;
+}
+
+.card {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 32rem;
+  width: 100%;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+/* Alpine.js x-cloak styling */
+[x-cloak] {
+  display: none !important;
 }
 
 /* Loading Styles */
 .loading-spinner {
-  @apply inline-block w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin;
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #d1d5db;
+  border-top: 2px solid #4b5563;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Reader Specific Styles */
 .reader-container {
-  @apply flex h-screen overflow-hidden font-serif;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  background-color: #f9fafb;
 }
 
 .sidebar {
-  @apply w-80 bg-white border-r border-gray-200 overflow-y-auto flex-shrink-0 flex flex-col;
+  width: 20rem;
+  background-color: white;
+  border-right: 1px solid #e5e7eb;
+  overflow-y: auto;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .main-content {
-  @apply flex-1 overflow-y-auto relative scroll-behavior-smooth bg-gray-50;
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+  scroll-behavior: smooth;
+  background-color: #f9fafb;
+  min-height: 0;
 }
 
 .content-wrapper {
-  @apply max-w-4xl mx-auto py-16 px-8 text-lg leading-relaxed text-gray-900;
+  max-width: 42rem; /* 672px, good reading width */
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #111827;
 }
 
 .book-content h1,
@@ -119,118 +199,529 @@
 .book-content h4,
 .book-content h5,
 .book-content h6 {
-  @apply font-sans font-semibold text-gray-900 mt-8 mb-4;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 600;
+  color: #111827;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
 }
 
-.book-content h1 { @apply text-3xl; }
-.book-content h2 { @apply text-2xl; }
-.book-content h3 { @apply text-xl; }
+.book-content h1 {
+  font-size: 1.875rem;
+}
+
+.book-content h2 {
+  font-size: 1.5rem;
+}
+
+.book-content h3 {
+  font-size: 1.25rem;
+}
 
 .book-content p {
-  @apply mb-6 text-justify;
+  margin-bottom: 1.5rem;
+  text-align: justify;
+  text-indent: 2em;
+  line-height: 1.8;
 }
 
 .book-content img {
-  @apply max-w-full h-auto block my-8 mx-auto rounded-lg shadow-md;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 2rem auto;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .book-content ul,
 .book-content ol {
-  @apply mb-6 pl-8;
+  margin-bottom: 1.5rem;
+  padding-left: 2rem;
 }
 
 .book-content li {
-  @apply mb-2;
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
 }
 
 .book-content blockquote {
-  @apply border-l-4 border-gray-600 pl-6 my-6 italic text-gray-600;
+  border-left: 4px solid #4b5563;
+  padding-left: 1.5rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: #6b7280;
+  background-color: #f9fafb;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-radius: 0 0.5rem 0.5rem 0;
 }
 
 .book-content a {
-  @apply text-gray-600 hover:underline;
+  color: #6b7280;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.book-content a:hover {
+  color: #111827;
 }
 
 /* Chat Styles */
 .chat-btn {
-  @apply fixed bottom-8 right-8 w-16 h-16 bg-gray-600 text-white border-0 rounded-full cursor-pointer text-2xl flex items-center justify-center shadow-lg transition-all duration-300 hover:bg-gray-700 hover:scale-105 z-40;
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 4rem;
+  height: 4rem;
+  background-color: #4b5563;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
+  z-index: 40;
+}
+
+.chat-btn:hover {
+  background-color: #374151;
+  transform: scale(1.05);
 }
 
 .chat-btn.active {
-  @apply bg-red-500;
+  background-color: #ef4444;
 }
 
 .chat-dialog {
-  @apply fixed bottom-24 right-8 w-[420px] h-[calc(100vh-10rem)] bg-white rounded-2xl shadow-2xl flex flex-col z-39 overflow-hidden max-w-[calc(100vw-4rem)] hidden;
+  position: fixed;
+  bottom: 6rem;
+  right: 2rem;
+  width: 420px;
+  max-width: calc(100vw - 4rem);
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  z-index: 9999;
+  overflow: hidden;
 }
 
-.chat-dialog.open {
-  @apply block;
+.chat-close-btn {
+  color: white;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  padding: 0.25rem;
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  position: relative;
+  z-index: 10000;
+  pointer-events: auto;
+  user-select: none;
 }
 
+.chat-close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.chat-close-btn:active {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: scale(0.95);
+}
+
+/* Ensure chat header doesn't block button events */
 .chat-header {
-  @apply bg-gradient-to-r from-gray-600 to-gray-700 text-white p-4 flex justify-between items-center font-semibold;
+  background: linear-gradient(to right, #4b5563, #374151);
+  color: white;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  position: relative;
+  z-index: 9999;
 }
 
 .chat-messages {
-  @apply flex-1 p-4 overflow-y-auto text-sm leading-relaxed min-h-0;
+  background: #ffffff;
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  min-height: 0;
+}
+
+/* Chat input area */
+.chat-input-area {
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  padding: 1rem;
+}
+
+/* Chat shortcuts area */
+.chat-shortcuts {
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Table of Contents Styles */
+.toc-link {
+  display: block;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #374151;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+  font-weight: 400;
+}
+
+.toc-link:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  border-left-color: #d1d5db;
+  transform: translateX(2px);
+}
+
+.toc-link.active {
+  background-color: #e5e7eb;
+  color: #1f2937;
+  border-left-color: #4b5563;
+  font-weight: 600;
+  box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.toc-sub-link {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  margin-left: 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 2px solid transparent;
+  position: relative;
+}
+
+.toc-sub-link:hover {
+  background-color: #f9fafb;
+  color: #4b5563;
+  border-left-color: #9ca3af;
+  transform: translateX(1px);
+}
+
+.toc-sub-link.active {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  border-left-color: #4b5563;
+  font-weight: 500;
+}
+
+.toc-section {
+  margin-bottom: 0.5rem;
+}
+
+.toc-section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 0.75rem;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.toc-section-title:first-child {
+  margin-top: 0;
+}
+
+/* Chapter progress indicator */
+.toc-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: linear-gradient(to bottom, #10b981, #34d399);
+  border-radius: 0 2px 2px 0;
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+  transform-origin: top;
+}
+
+.toc-link.active::after {
+  transform: scaleY(1);
+}
+
+/* Mobile responsive TOC styles */
+@media (max-width: 768px) {
+  .toc-link {
+    padding: 0.625rem;
+    font-size: 0.8rem;
+  }
+
+  .toc-sub-link {
+    padding: 0.375rem 0.625rem;
+    margin-left: 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .toc-section-title {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.7rem;
+  }
+}
+
+/* Markdown content styling */
+.message .prose {
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.message .prose p {
+  margin-bottom: 0.5rem;
+}
+
+.message .prose p:last-child {
+  margin-bottom: 0;
+}
+
+.message .prose ul,
+.message .prose ol {
+  margin-bottom: 0.5rem;
+  padding-left: 1rem;
+}
+
+.message .prose li {
+  margin-bottom: 0.25rem;
+}
+
+.message .prose strong {
+  font-weight: 600;
+}
+
+.message .prose em {
+  font-style: italic;
+}
+
+.message .prose code {
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+.message .prose pre {
+  background-color: #f3f4f6;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  overflow-x: auto;
+  margin-bottom: 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+.message .prose h1,
+.message .prose h2,
+.message .prose h3,
+.message .prose h4,
+.message .prose h5,
+.message .prose h6 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.message .prose h1:first-child,
+.message .prose h2:first-child,
+.message .prose h3:first-child,
+.message .prose h4:first-child,
+.message .prose h5:first-child,
+.message .prose h6:first-child {
+  margin-top: 0;
 }
 
 .message {
-  @apply mb-4;
+  margin-bottom: 1rem;
 }
 
 .message.user {
-  @apply text-right;
+  text-align: right;
 }
 
 .message.assistant {
-  @apply text-left;
+  text-align: left;
+}
+
+/* New structure for better hover interaction */
+.message-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.message-interactive-area {
+  display: inline-block;
+  position: relative;
+  max-width: 100%;
 }
 
 .message-bubble {
-  @apply inline-block max-w-[85%] p-3 rounded-2xl word-wrap break-keep relative;
+  display: inline-block;
+  max-width: 85%;
+  padding: 0.75rem;
+  border-radius: 1rem;
+  word-wrap: break-keep;
+  position: relative;
 }
 
 .message.user .message-bubble {
-  @apply bg-gray-700 text-white rounded-br-lg;
+  background-color: #374151;
+  color: white;
+  border-bottom-right-radius: 0.25rem;
 }
 
 .message.assistant .message-bubble {
-  @apply bg-gray-100 text-gray-900 border border-gray-300 rounded-bl-lg;
+  background-color: #f3f4f6;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  border-bottom-left-radius: 0.25rem;
+}
+
+/* Message actions styling */
+.message-actions {
+  z-index: 10;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 6px;
+}
+
+.message-actions button {
+  min-width: auto;
+  white-space: nowrap;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  color: #4b5563;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+.message-actions button:hover {
+  background: #ffffff;
+  color: #1f2937;
+  border-color: #d1d5db;
+}
+
+/* Responsive text in buttons */
+@media (max-width: 640px) {
+  .message-actions button span {
+    display: none !important;
+  }
+
+  .message-actions {
+    min-width: auto;
+  }
+}
+
+/* Hide actions by default, show on hover for assistant messages */
+.message-interactive-area:not(:hover) .message-actions {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.message-interactive-area:hover .message-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Image preview styling fixes */
+.message-bubble ul, .message-bubble ol {
+    padding-left: 24px !important;
+    margin: 10px 0 !important;
+}
+
+.message-bubble ul li {
+    list-style-type: disc !important;
+    margin-bottom: 6px;
+}
+
+/* Fix preview container rendering issues */
+#imagePreview ul li {
+    list-style-type: disc;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .reader-container {
-    @apply flex-col;
+    flex-direction: column;
   }
 
   .sidebar {
-    @apply w-full h-[50vh] border-r-0 border-b border-gray-200;
+    width: 100%;
+    height: 50vh;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
   }
 
   .main-content {
-    @apply h-[50vh];
+    height: 50vh;
   }
 
   .content-wrapper {
-    @apply py-12 px-4 text-base;
+    padding: 3rem 1rem;
+    font-size: 1rem;
+    max-width: 100%;
+  }
+
+  .book-content p {
+    text-indent: 1.5em;
   }
 
   .chat-dialog {
-    @apply w-[calc(100vw-2rem)] right-4;
-    bottom-20;
-    height: [calc(100vh-8rem)];
+    width: calc(100vw - 2rem);
+    right: 1rem;
+    bottom: 5rem;
+    height: calc(100vh - 8rem);
   }
 }
 
 @media (max-width: 480px) {
   .content-wrapper {
-    @apply py-8 px-3;
+    padding: 2rem 0.75rem;
+    max-width: 100%;
+    font-size: 0.875rem;
+  }
+
+  .book-content p {
+    text-indent: 1em;
   }
 
   .chat-dialog {
-    @apply w-[calc(100vw-1rem)] right-2;
+    width: calc(100vw - 1rem);
+    right: 0.5rem;
   }
 }

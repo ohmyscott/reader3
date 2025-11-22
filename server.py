@@ -31,6 +31,14 @@ from chat_service import chat_service, ChatRequest
 
 app = FastAPI()
 
+# Configuration
+BOOKS_DIR = os.getenv("BOOKS_DIR", "./books")
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", "./uploads")
+
+# Ensure books and uploads directories exist
+os.makedirs(BOOKS_DIR, exist_ok=True)
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 # Add CORS middleware for frontend-backend separation
 app.add_middleware(
     CORSMiddleware,
@@ -40,8 +48,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files directory
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Mount frontend directory for JavaScript files
 app.mount("/js", StaticFiles(directory="frontend/js"), name="frontend_js")
@@ -52,19 +58,17 @@ app.mount("/css", StaticFiles(directory="frontend/css"), name="frontend_css")
 # Mount frontend API modules directory
 app.mount("/frontend-api", StaticFiles(directory="frontend/api"), name="frontend_api")
 
-# Serve index.html for the root route
-@app.get("/", response_class=FileResponse)
-async def serve_index():
+# Frontend page serving
+@app.get("/")
+async def read_root():
+    """Serve the main library page."""
     return FileResponse("frontend/index.html")
 
-# Serve index.html for reader routes (SPA routing)
-@app.get("/read/{book_id}", response_class=FileResponse)
-async def serve_reader_with_book():
-    return FileResponse("frontend/index.html")
+@app.get("/read/{book_id}/{chapter_index}")
+async def read_book_page(book_id: str, chapter_index: int):
+    """Serve the reader page for a specific book and chapter."""
+    return FileResponse("frontend/reader.html")
 
-@app.get("/read/{book_id}/{chapter_index}", response_class=FileResponse)
-async def serve_reader_with_chapter():
-    return FileResponse("frontend/index.html")
 
 
 # Pydantic models for chat API
@@ -80,25 +84,33 @@ class ChatApiRequest(BaseModel):
     question: str = ""  # Only for Q&A
     conversation_history: Optional[list[ChatMessage]] = None
 
-# Where are the book folders located?
-BOOKS_DIR = "."
 
 @lru_cache(maxsize=10)
-def load_book_cached(folder_name: str) -> Optional[Book]:
+def load_book_cached(book_id: str) -> Optional[Book]:
     """
     Loads the book from the pickle file.
     Cached so we don't re-read the disk on every click.
     """
+    # Try the book_id as is first
+    folder_name = book_id
     file_path = os.path.join(BOOKS_DIR, folder_name, "book.pkl")
+
+    # If not found, try with _data suffix
     if not os.path.exists(file_path):
+        folder_name = f"{book_id}_data"
+        file_path = os.path.join(BOOKS_DIR, folder_name, "book.pkl")
+
+    if not os.path.exists(file_path):
+        logger.error(f"Book file not found for book_id: {book_id} (tried: {book_id}, {book_id}_data)")
         return None
 
     try:
         with open(file_path, "rb") as f:
             book = pickle.load(f)
+        logger.info(f"Successfully loaded book from: {folder_name}")
         return book
     except Exception as e:
-        print(f"Error loading book {folder_name}: {e}")
+        logger.error(f"Error loading book {folder_name}: {e}")
         return None
 
 # API Endpoints for Frontend-Backend Separation
@@ -110,7 +122,7 @@ async def get_all_books():
 
     if os.path.exists(BOOKS_DIR):
         for item in os.listdir(BOOKS_DIR):
-            if item.endswith("_data") and os.path.isdir(item):
+            if item.endswith("_data") and os.path.isdir(os.path.join(BOOKS_DIR, item)):
                 book_folder = os.path.join(BOOKS_DIR, item)
                 try:
                     book = load_book_cached(item)
@@ -201,7 +213,12 @@ async def serve_image(book_id: str, image_name: str):
     safe_book_id = os.path.basename(book_id)
     safe_image_name = os.path.basename(image_name)
 
+    # Try the book_id as is first (for backward compatibility)
     img_path = os.path.join(BOOKS_DIR, safe_book_id, "images", safe_image_name)
+
+    # If not found, try with _data suffix (current format)
+    if not os.path.exists(img_path):
+        img_path = os.path.join(BOOKS_DIR, f"{safe_book_id}_data", "images", safe_image_name)
 
     if not os.path.exists(img_path):
         raise HTTPException(status_code=404, detail="Image not found")
@@ -316,16 +333,25 @@ async def chat_with_content_stream(
 ):
     """SSE streaming chat API for AI interactions with book content."""
 
+    logger.info(f"Chat request received: prompt_type={prompt_type}, book_id={book_id}, chapter_index={chapter_index}, question='{question[:50]}...'")
+
     async def generate_chat_response():
         try:
             # Parse conversation history
             history = json.loads(conversation_history) if conversation_history else []
             history = [{"role": msg["role"], "content": msg["content"]} for msg in history]
 
+            # Debug: List available book directories
+            logger.info(f"Looking for book with ID: {book_id}")
+            if os.path.exists(BOOKS_DIR):
+                available_dirs = [d for d in os.listdir(BOOKS_DIR) if d.endswith("_data")]
+                logger.info(f"Available book directories: {available_dirs}")
+
             # Load the book
             book = load_book_cached(book_id)
             if not book:
-                yield JSONServerSentEvent(data={"error": "Book not found"})
+                logger.error(f"Book not found: {book_id}")
+                yield JSONServerSentEvent(data={"error": f"Book not found: {book_id}"})
                 return
 
             # Validate chapter index
@@ -424,7 +450,7 @@ async def chat_with_content_stream(
             logger.error(f"Streaming error: {e}", exc_info=True)
             yield JSONServerSentEvent(data={"error": f"Failed to process request: {str(e)}"}, event="error")
 
-    return EventSourceResponse(generate_chat_response(), ping=20)
+    return EventSourceResponse(generate_chat_response(), ping=20, media_type="text/event-stream")
 
 @app.post("/api/upload-book")
 async def upload_book(epub_file: UploadFile = File(...)):
@@ -439,27 +465,36 @@ async def upload_book(epub_file: UploadFile = File(...)):
 
     logger.info(f"Processing EPUB upload: {epub_file.filename}")
 
-    # Create a temporary file to save the uploaded EPUB
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.epub') as temp_file:
-        shutil.copyfileobj(epub_file.file, temp_file)
-        temp_file_path = temp_file.name
+    # Save the uploaded EPUB file to UPLOAD_DIR
+    original_filename = epub_file.filename
+    safe_filename = "".join(c for c in original_filename if c.isalnum() or c in ('-', '_', '.')).strip()
+    if not safe_filename:
+        safe_filename = f"upload_{int(time.time())}.epub"
+
+    upload_file_path = os.path.join(UPLOAD_DIR, safe_filename)
+
+    # Save uploaded file permanently
+    with open(upload_file_path, 'wb') as upload_file:
+        shutil.copyfileobj(epub_file.file, upload_file)
+
+    logger.info(f"Saved uploaded file to: {upload_file_path}")
 
     try:
         # Run reader3.py to process the EPUB file
-        logger.info(f"Running reader3.py on {temp_file_path}")
+        logger.info(f"Running reader3.py on {upload_file_path}")
 
         # Use the same virtual environment and command as you mentioned
         result = subprocess.run(
-            ["uv", "run", "reader3.py", temp_file_path],
+            ["uv", "run", "reader3.py", upload_file_path],
             capture_output=True,
             text=True,
             cwd="."  # Run in the current directory
         )
 
-        # Find the generated data folder and copy it to current directory
-        temp_base = os.path.splitext(os.path.basename(temp_file_path))[0]
+        # Find the generated data folder and copy it to BOOKS_DIR
+        temp_base = os.path.splitext(os.path.basename(upload_file_path))[0]
         temp_data_folder = f"{temp_base}_data"
-        temp_data_path = os.path.join(os.path.dirname(temp_file_path), temp_data_folder)
+        temp_data_path = os.path.join(os.path.dirname(upload_file_path), temp_data_folder)
 
         # Generate a proper folder name based on the original filename
         original_base = os.path.splitext(os.path.basename(epub_file.filename))[0]
@@ -467,18 +502,15 @@ async def upload_book(epub_file: UploadFile = File(...)):
         if not safe_folder_name:
             safe_folder_name = f"book_{int(time.time())}"
         final_data_folder = f"{safe_folder_name}_data"
-        final_data_path = os.path.join(".", final_data_folder)
+        final_data_path = os.path.join(BOOKS_DIR, final_data_folder)
 
-        # Copy the data folder to current directory if it exists
+        # Copy the data folder to BOOKS_DIR if it exists
         data_folder_name = final_data_folder  # Use our generated folder name
         if os.path.exists(temp_data_path):
             logger.info(f"Copying data from {temp_data_path} to {final_data_path}")
             shutil.copytree(temp_data_path, final_data_path)
-            # Clean up temporary data folder
+            # Clean up temporary data folder from UPLOAD_DIR
             shutil.rmtree(temp_data_path)
-
-        # Clean up temporary file
-        os.unlink(temp_file_path)
 
         if result.returncode != 0:
             logger.error(f"reader3.py failed: {result.stderr}")
@@ -532,9 +564,9 @@ async def upload_book(epub_file: UploadFile = File(...)):
         )
 
     except Exception as e:
-        # Clean up temporary file on error
-        if os.path.exists(temp_file_path):
-            os.unlink(temp_file_path)
+        # Clean up uploaded file on error
+        if os.path.exists(upload_file_path):
+            os.unlink(upload_file_path)
 
         logger.error(f"Upload processing error: {e}")
         return JSONResponse(
@@ -544,5 +576,7 @@ async def upload_book(epub_file: UploadFile = File(...)):
 
 if __name__ == "__main__":
     import uvicorn
-    print("Starting server at http://127.0.0.1:8123")
-    uvicorn.run(app, host="127.0.0.1", port=8123)
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", "8123"))
+    print(f"Starting server at http://{host}:{port}")
+    uvicorn.run(app, host=host, port=port)

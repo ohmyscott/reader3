@@ -1,4 +1,4 @@
-import { booksAPI } from '../../frontend-api/books.js';
+import { booksAPI } from '/frontend-api/books.js';
 
 export function LibraryPage() {
   return {
@@ -134,11 +134,8 @@ export function LibraryPage() {
     },
 
     openReader(bookId) {
-      // Get the main app component and call its navigate method
-      const appEl = document.getElementById('app');
-      if (appEl && appEl._x_dataStack && appEl._x_dataStack[0]) {
-        appEl._x_dataStack[0].navigateToReader(bookId, 0);
-      }
+      // Navigate to the reader page
+      window.location.href = `/read/${encodeURIComponent(bookId)}/0`;
     },
 
     toggleDarkMode() {

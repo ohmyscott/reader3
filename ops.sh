@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Reader3 Dev Tools Script
+# Reader3 Operations Script
 
 set -e
 
@@ -43,7 +43,7 @@ PID_FILE=".dev_server.pid"
 
 print_header() {
     printf "${PURPLE}================================${NC}\n"
-    printf "${PURPLE}  Reader3 Dev Tools${NC}\n"
+    printf "${PURPLE}  Reader3 Operations${NC}\n"
     printf "${PURPLE}================================${NC}\n"
 }
 
@@ -77,7 +77,7 @@ check_project_dir() {
 show_usage() {
     print_header
     cat << 'EOF'
-Usage: ./dev-tools.sh [ENVIRONMENT] COMMAND
+Usage: ./ops.sh [ENVIRONMENT] COMMAND
 
 ENVIRONMENTS:
   dev     Development environment (default)
@@ -94,12 +94,12 @@ COMMANDS:
   help    Show this help message
 
 EXAMPLES:
-  ./dev-tools.sh dev start     # Start dev environment
-  ./dev-tools.sh prod start    # Start prod environment
-  ./dev-tools.sh ls            # Show file statistics
-  ./dev-tools.sh prod build    # Build prod Docker images
-  ./dev-tools.sh clean lru     # Clean old files (keep 10 most recent)
-  ./dev-tools.sh clean lru 5   # Clean old files (keep 5 most recent)
+  ./ops.sh dev start     # Start dev environment
+  ./ops.sh prod start    # Start prod environment
+  ./ops.sh ls            # Show file statistics
+  ./ops.sh prod build    # Build prod Docker images
+  ./ops.sh clean lru     # Clean old files (keep 10 most recent)
+  ./ops.sh clean lru 5   # Clean old files (keep 5 most recent)
 EOF
 }
 
