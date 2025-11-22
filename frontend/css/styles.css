@@ -313,35 +313,6 @@ body.bg-gray-900 {
   overflow: hidden;
 }
 
-.chat-close-btn {
-  color: white;
-  background: transparent;
-  border: none;
-  border-radius: 50%;
-  padding: 0.25rem;
-  cursor: pointer;
-  font-size: 1.2rem;
-  line-height: 1;
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s;
-  position: relative;
-  z-index: 10000;
-  pointer-events: auto;
-  user-select: none;
-}
-
-.chat-close-btn:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.chat-close-btn:active {
-  background-color: rgba(255, 255, 255, 0.3);
-  transform: scale(0.95);
-}
 
 /* Ensure chat header doesn't block button events */
 .chat-header {
