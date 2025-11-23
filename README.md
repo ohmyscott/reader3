@@ -59,7 +59,7 @@ cp .env.example .env
 # Edit .env with your AI provider settings
 
 # Start the application
-docker-compose up -d
+docker compose up -d
 
 # Access the application
 open http://localhost:8123
@@ -69,7 +69,7 @@ open http://localhost:8123
 
 ```bash
 # Prerequisites
-Python 3.8+
+Python 3.10+
 Node.js 16+ (for frontend development)
 
 # Install dependencies
@@ -85,18 +85,34 @@ uv run python server.py
 
 ## 🏗️ Architecture
 
-```mermaid
-graph TB
-    A[User Interface] --> B[Frontend (Alpine.js + TailwindCSS)]
-    B --> C[FastAPI Backend]
-    C --> D[EPUB Parser]
-    C --> E[AI Service Layer]
-    E --> F[Provider Abstraction]
-    F --> G[OpenAI API]
-    F --> H[LM Studio]
-    F --> I[Ollama]
-    C --> J[TinyDB Storage]
-    C --> K[File System]
+```
+┌─────────────────┐
+│   User Interface │
+└─────────┬───────┘
+          │
+          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 Frontend (Alpine.js + TailwindCSS)         │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    FastAPI Backend                      │
+└─────────────────┬───────────────────────────────────────────┘
+                  │
+    ┌─────────────┼─────────────┬─────────────┬─────────────┐
+    │             │             │             │             │
+    ▼             ▼             ▼             ▼             ▼
+┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐
+│EPUB    │  │  AI     │  │ Provider │  │TinyDB   │  │ File   │
+│Parser  │  │ Service │  │Abstraction│  │Storage  │  │System  │
+└─────────┘  └─────────┘  └─────────┘  └─────────┘  └─────────┘
+                  │             │             │             │
+                  ▼             ▼             ▼             ▼
+            ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐
+            │OpenAI  │  │LM Studio│  │ Ollama   │
+            │API    │  │   API   │  │   API   │
+            └─────────┘  └─────────┘  └─────────┘  └─────────┘
 ```
 
 ## ⚙️ Configuration
@@ -115,7 +131,7 @@ OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_MODEL=gpt-4o-mini
 
 # LM Studio Configuration
-LMSTUDIO_BASE_URL=http://127.0.0.1:1234/v1
+LMSTUDIO_BASE_URL=http://localhost:1234/v1
 LMSTUDIO_MODEL=your_local_model
 
 # Ollama Configuration
@@ -134,7 +150,7 @@ UPLOAD_DIR=./uploads
 | Provider | API Key Required | Base URL | Privacy | Cost |
 |----------|-------------------|----------|---------|------|
 | OpenAI | Yes | api.openai.com | Cloud | Pay-per-token |
-| LM Studio | No | 127.0.0.1:1234 | Local | Free |
+| LM Studio | No | localhost:1234 | Local | Free |
 | Ollama | No | localhost:11434 | Local | Free |
 
 ## 📱 Screenshots
@@ -181,20 +197,14 @@ reader3/
 ### Development Workflow
 
 ```bash
-# Setup development environment
-./ops.sh dev setup
-
 # Start development server
 ./ops.sh dev start
 
-# Run tests
-./ops.sh test
+# Check service status
+./ops.sh dev ps
 
-# Code formatting
-./ops.sh format
-
-# Type checking
-./ops.sh type-check
+# Stop development server
+./ops.sh dev stop
 ```
 
 ## 🐳 Docker Deployment
@@ -214,18 +224,9 @@ docker-compose -f docker-compose.prod.yml up -d
 docker-compose -f docker-compose.prod.yml up -d --scale reader3=3
 
 # Check production status
-./ops.sh prod status
+./ops.sh prod ps
 ```
 
-### Health Monitoring
-
-```bash
-# Health check endpoint
-curl http://localhost:8123/health
-
-# Application status
-curl http://localhost:8123/api/status
-```
 
 ## 📊 Performance
 
@@ -258,33 +259,25 @@ curl http://localhost:8123/api/status
 ### Management Commands
 
 ```bash
-# Application management
-./ops.sh start          # Start application
-./ops.sh stop           # Stop application
-./ops.sh restart        # Restart application
-./ops.sh status         # Check status
+# Application management (development)
+./ops.sh dev start      # Start development server
+./ops.sh dev stop       # Stop development server
+./ops.sh dev restart    # Restart development server
+./ops.sh dev ps         # Check service status
 
-# Book management
-./ops.sh books list     # List all books
-./ops.sh books clean     # Clean old books
-./ops.sh books backup    # Backup book data
+# Application management (production)
+./ops.sh prod start     # Start production server
+./ops.sh prod stop      # Stop production server
+./ops.sh prod restart   # Restart production server
+./ops.sh prod ps        # Check production status
 
-# Database operations
-./ops.sh db init         # Initialize database
-./ops.sh db migrate      # Migrate data
-./ops.sh db backup       # Backup database
-```
+# Build production images
+./ops.sh prod build     # Build Docker images
 
-### Monitoring
-
-```bash
-# Application logs
-./ops.sh logs            # View logs
-./ops.sh logs follow     # Follow logs
-
-# Performance monitoring
-./ops.sh monitor         # System metrics
-./ops.sh health          # Health checks
+# File management
+./ops.sh ls             # Show EPUB statistics
+./ops.sh clean lru      # Clean old files
+./ops.sh clean lru 5    # Keep 5 most recent files
 ```
 
 ## 🧪 Testing
@@ -292,29 +285,22 @@ curl http://localhost:8123/api/status
 ### Test Suite
 
 ```bash
-# Run all tests
-./ops.sh test
-
-# Run specific test categories
-./ops.sh test unit      # Unit tests
-./ops.sh test integration # Integration tests
-./ops.sh test e2e        # End-to-end tests
-
-# Test coverage
-./ops.sh test coverage   # Coverage report
+# Testing is not yet implemented (TODO)
+# Future testing capabilities will include:
+# - Unit tests
+# - Integration tests
+# - End-to-end tests
+# - Test coverage reporting
 ```
 
 ### Manual Testing
 
 ```bash
-# Test different AI providers
-./ops.sh test providers
-
-# Test EPUB processing
-./ops.sh test epub
-
-# Test API endpoints
-./ops.sh test api
+# Manual testing can be performed by:
+# - Uploading and reading EPUB files
+# - Testing AI assistant functionality
+# - Verifying provider switching
+# - Checking responsive design
 ```
 
 ## 🤝 Contributing
@@ -332,7 +318,6 @@ We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING
 ### Code Standards
 
 - Follow [PEP 8](https://pep8.org/) for Python code
-- Use [Black](https://black.readthedocs.io/) for code formatting
 - Write comprehensive tests for new features
 - Update documentation for API changes
 

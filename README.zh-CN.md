@@ -59,7 +59,7 @@ cp .env.example .env
 # 编辑.env文件，配置您的AI提供商设置
 
 # 启动应用
-docker-compose up -d
+docker compose up -d
 
 # 访问应用
 open http://localhost:8123
@@ -69,7 +69,7 @@ open http://localhost:8123
 
 ```bash
 # 系统要求
-Python 3.8+
+Python 3.10+
 Node.js 16+（用于前端开发）
 
 # 安装依赖
@@ -85,18 +85,34 @@ uv run python server.py
 
 ## 🏗️ 系统架构
 
-```mermaid
-graph TB
-    A[用户界面] --> B[前端 (Alpine.js + TailwindCSS)]
-    B --> C[FastAPI 后端]
-    C --> D[EPUB解析器]
-    C --> E[AI服务层]
-    E --> F[提供商抽象层]
-    F --> G[OpenAI API]
-    F --> H[LM Studio]
-    F --> I[Ollama]
-    C --> J[TinyDB 存储]
-    C --> K[文件系统]
+```
+┌─────────────────┐
+│    用户界面     │
+└─────────┬───────┘
+          │
+          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 前端 (Alpine.js + TailwindCSS)            │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    FastAPI 后端                        │
+└─────────────────┬───────────────────────────────────────────┘
+                  │
+    ┌─────────────┼─────────────┬─────────────┬─────────────┐
+    │             │             │             │             │
+    ▼             ▼             ▼             ▼             ▼
+┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐
+│EPUB    │  │  AI     │  │ 提供商   │  │TinyDB   │  │ 文件   │
+│解析器  │  │  服务   │  │  抽象层  │  │  存储   │  │  系统  │
+└─────────┘  └─────────┘  └─────────┘  └─────────┘  └─────────┘
+                  │             │             │             │
+                  ▼             ▼             ▼             ▼
+            ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐
+            │OpenAI  │  │LM Studio│  │ Ollama   │
+            │API    │  │   API   │  │   API   │
+            └─────────┘  └─────────┘  └─────────┘  └─────────┘
 ```
 
 ## ⚙️ 配置说明
@@ -115,7 +131,7 @@ OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_MODEL=gpt-4o-mini
 
 # LM Studio配置
-LMSTUDIO_BASE_URL=http://127.0.0.1:1234/v1
+LMSTUDIO_BASE_URL=http://localhost:1234/v1
 LMSTUDIO_MODEL=your_local_model
 
 # Ollama配置
@@ -134,7 +150,7 @@ UPLOAD_DIR=./uploads
 | 提供商 | API密钥要求 | Base URL | 隐私性 | 成本 |
 |--------|-------------|----------|--------|------|
 | OpenAI | 必需 | api.openai.com | 云端 | 按令牌付费 |
-| LM Studio | 可选 | 127.0.0.1:1234 | 本地 | 免费 |
+| LM Studio | 可选 | localhost:1234 | 本地 | 免费 |
 | Ollama | 可选 | localhost:11434 | 本地 | 免费 |
 
 ## 📱 界面截图
@@ -181,20 +197,14 @@ reader3/
 ### 开发工作流
 
 ```bash
-# 设置开发环境
-./ops.sh dev setup
-
 # 启动开发服务器
 ./ops.sh dev start
 
-# 运行测试
-./ops.sh test
+# 检查服务状态
+./ops.sh dev ps
 
-# 代码格式化
-./ops.sh format
-
-# 类型检查
-./ops.sh type-check
+# 停止开发服务器
+./ops.sh dev stop
 ```
 
 ## 🐳 Docker部署
@@ -214,18 +224,9 @@ docker-compose -f docker-compose.prod.yml up -d
 docker-compose -f docker-compose.prod.yml up -d --scale reader3=3
 
 # 检查生产环境状态
-./ops.sh prod status
+./ops.sh prod ps
 ```
 
-### 健康监控
-
-```bash
-# 健康检查端点
-curl http://localhost:8123/health
-
-# 应用状态
-curl http://localhost:8123/api/status
-```
 
 ## 📊 性能指标
 
@@ -258,33 +259,25 @@ curl http://localhost:8123/api/status
 ### 管理命令
 
 ```bash
-# 应用管理
-./ops.sh start          # 启动应用
-./ops.sh stop           # 停止应用
-./ops.sh restart        # 重启应用
-./ops.sh status         # 检查状态
+# 应用管理（开发环境）
+./ops.sh dev start      # 启动开发服务器
+./ops.sh dev stop       # 停止开发服务器
+./ops.sh dev restart    # 重启开发服务器
+./ops.sh dev ps         # 检查服务状态
 
-# 图书管理
-./ops.sh books list     # 列出所有图书
-./ops.sh books clean     # 清理旧图书
-./ops.sh books backup    # 备份图书数据
+# 应用管理（生产环境）
+./ops.sh prod start     # 启动生产服务器
+./ops.sh prod stop      # 停止生产服务器
+./ops.sh prod restart   # 重启生产服务器
+./ops.sh prod ps        # 检查生产环境状态
 
-# 数据库操作
-./ops.sh db init         # 初始化数据库
-./ops.sh db migrate      # 迁移数据
-./ops.sh db backup       # 备份数据库
-```
+# 构建生产镜像
+./ops.sh prod build     # 构建Docker镜像
 
-### 监控
-
-```bash
-# 应用日志
-./ops.sh logs            # 查看日志
-./ops.sh logs follow     # 跟踪日志
-
-# 性能监控
-./ops.sh monitor         # 系统指标
-./ops.sh health          # 健康检查
+# 文件管理
+./ops.sh ls             # 显示EPUB统计信息
+./ops.sh clean lru      # 清理旧文件
+./ops.sh clean lru 5    # 保留最新5个文件
 ```
 
 ## 🧪 测试
@@ -292,29 +285,22 @@ curl http://localhost:8123/api/status
 ### 测试套件
 
 ```bash
-# 运行所有测试
-./ops.sh test
-
-# 运行特定测试类别
-./ops.sh test unit      # 单元测试
-./ops.sh test integration # 集成测试
-./ops.sh test e2e        # 端到端测试
-
-# 测试覆盖率
-./ops.sh test coverage   # 覆盖率报告
+# 测试功能尚未实现（TODO）
+# 未来将包含的测试功能：
+# - 单元测试
+# - 集成测试
+# - 端到端测试
+# - 测试覆盖率报告
 ```
 
 ### 手动测试
 
 ```bash
-# 测试不同AI提供商
-./ops.sh test providers
-
-# 测试EPUB处理
-./ops.sh test epub
-
-# 测试API端点
-./ops.sh test api
+# 手动测试可以包括：
+# - 上传和阅读EPUB文件
+# - 测试AI助手功能
+# - 验证提供商切换
+# - 检查响应式设计
 ```
 
 ## 🤝 贡献指南
@@ -332,7 +318,6 @@ curl http://localhost:8123/api/status
 ### 代码规范
 
 - 遵循 [PEP 8](https://pep8.org/) Python代码规范
-- 使用 [Black](https://black.readthedocs.io/) 进行代码格式化
 - 为新功能编写全面的测试
 - 更新API变更的文档
 
